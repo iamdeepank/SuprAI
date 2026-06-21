@@ -129,4 +129,4 @@ cargo run -p rusty-claude-cli -- prompt "summarize /repo"
 - Docker and Podman use the same checked-in `Containerfile`.
 - The `:Z` suffix in the Podman examples is for SELinux relabeling; keep it on Fedora/RHEL-class hosts.
 - Running with `CARGO_TARGET_DIR=/tmp/claw-target` avoids leaving container-owned `target/` artifacts in your bind-mounted checkout.
-- For non-container local development, keep using [`../USAGE.md`](../USAGE.md) and [`../rust/README.md`](../rust/README.md).
+- For non-container local development, keep using [CLI usage](guide/cli-usage.md) and [Rust workspace](developer/rust-workspace.md).

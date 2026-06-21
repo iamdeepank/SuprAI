@@ -1,0 +1,100 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.asset_name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            asset_name: suprai-linux-x64
+            binary: suprai
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            asset_name: suprai-macos-x64
+            binary: suprai
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            asset_name: suprai-macos-arm64
+            binary: suprai
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            asset_name: suprai-windows-x64
+            binary: suprai.exe
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Set build metadata
+        shell: bash
+        run: |
+          echo "BUILD_DATE=$(date -u +%Y-%m-%d)" >> "$GITHUB_ENV"
+          echo "SOURCE_DATE_EPOCH=$(date -u +%s)" >> "$GITHUB_ENV"
+
+      - name: Build release binary
+        run: >
+          cargo build
+          --manifest-path rust/Cargo.toml
+          -p rusty-claude-cli
+          --release
+          --target ${{ matrix.target }}
+
+      - name: Stage release artifact
+        shell: bash
+        run: |
+          mkdir -p dist
+          SRC="rust/target/${{ matrix.target }}/release/${{ matrix.binary }}"
+          DEST="dist/${{ matrix.asset_name }}"
+          if [[ "${{ matrix.binary }}" == *.exe ]]; then
+            cp "$SRC" "${DEST}.exe"
+          else
+            cp "$SRC" "$DEST"
+          fi
+
+      - name: Generate checksum
+        shell: bash
+        run: |
+          cd dist
+          if [[ "${{ matrix.binary }}" == *.exe ]]; then
+            sha256sum "${{ matrix.asset_name }}.exe" > "${{ matrix.asset_name }}.sha256"
+          else
+            sha256sum "${{ matrix.asset_name }}" > "${{ matrix.asset_name }}.sha256"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}
+          path: dist/*
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: artifacts/*

@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "description": "Clawable Coding Harness - Clear roadmap stories and commit each",
+  "description": "SuprAI - Rust CLI agent harness roadmap stories",
   "stories": [
     {
       "id": "US-001",

@@ -75,4 +75,4 @@ cargo run -p claw-analog -- ...   # при RAG_BASE_URL или rag_base_url в T
 ## Связанные документы
 
 - Локальный запуск контейнеров (если поднимете векторку): [`container.md`](container.md).
-- Обзор `suprai-analog`: [`how_to_run.md`](../how_to_run.md).
+- Обзор `suprai-analog`: [Architecture](guide/architecture.md) и [Rust workspace](developer/rust-workspace.md).
