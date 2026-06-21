@@ -43,11 +43,11 @@ pub struct QdrantConfig {
 
 impl QdrantConfig {
     pub fn from_env() -> Option<Self> {
-        let url = std::env::var("CLAW_RAG_QDRANT_URL").ok()?;
-        let collection = std::env::var("CLAW_RAG_QDRANT_COLLECTION")
+        let url = std::env::var("SUPRAI_RAG_QDRANT_URL").ok()?;
+        let collection = std::env::var("SUPRAI_RAG_QDRANT_COLLECTION")
             .ok()
             .unwrap_or_else(|| "claw_rag_chunks".to_string());
-        let api_key = std::env::var("CLAW_RAG_QDRANT_API_KEY").ok();
+        let api_key = std::env::var("SUPRAI_RAG_QDRANT_API_KEY").ok();
         Some(Self {
             url,
             api_key,

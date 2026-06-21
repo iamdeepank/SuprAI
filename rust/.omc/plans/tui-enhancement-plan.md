@@ -1,4 +1,4 @@
-# TUI Enhancement Plan — Claw Code (`rusty-claude-cli`)
+# TUI Enhancement Plan — SuprAI (`rusty-claude-cli`)
 
 ## Executive Summary
 

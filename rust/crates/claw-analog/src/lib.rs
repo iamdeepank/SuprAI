@@ -21,7 +21,7 @@ pub use runtime::PermissionMode;
 use runtime::PermissionPolicy;
 use serde_json::{json, Value};
 
-/// Refuses unrestricted permission modes in non-interactive runs unless explicitly opted in (same spirit as full `claw` CLI).
+/// Refuses unrestricted permission modes in non-interactive runs unless explicitly opted in (same spirit as full `suprai` CLI).
 pub fn enforce_non_interactive_permission_rules(
     mode: PermissionMode,
     accept_danger_non_interactive: bool,

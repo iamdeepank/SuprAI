@@ -441,7 +441,7 @@ mod tests {
         let workspace = dir.path().canonicalize().unwrap();
         std::fs::write(workspace.join("fixture.txt"), "hello parity fixture\n").unwrap();
 
-        let base_session = workspace.join(".claw").join("agents-base.json");
+        let base_session = workspace.join(".suprai").join("agents-base.json");
         std::fs::create_dir_all(base_session.parent().unwrap()).unwrap();
         std::fs::write(
             &base_session,

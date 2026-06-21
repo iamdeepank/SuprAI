@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the canonical Claw Code 2.0 execution board from frozen roadmap evidence."""
+"""Generate the canonical SuprAI 2.0 execution board from frozen roadmap evidence."""
 from __future__ import annotations
 
 import argparse
@@ -106,9 +106,9 @@ def find_source_omx(repo_root: Path) -> Path:
     candidates.append(repo_root / ".omx")
     candidates.extend(parent / ".omx" for parent in repo_root.parents)
     for candidate in candidates:
-        if (candidate / "plans" / "claw-code-2-0-adaptive-plan.md").exists() and (candidate / "research").exists():
+        if (candidate / "plans" / "SuprAI-2-0-adaptive-plan.md").exists() and (candidate / "research").exists():
             return candidate
-    raise FileNotFoundError("could not locate source .omx with plans/claw-code-2-0-adaptive-plan.md and research/")
+    raise FileNotFoundError("could not locate source .omx with plans/SuprAI-2-0-adaptive-plan.md and research/")
 
 
 def parse_roadmap(path: Path) -> tuple[list[RoadmapRecord], list[RoadmapRecord]]:
@@ -356,7 +356,7 @@ def summarize_counts(items: list[dict[str, Any]], key: str) -> dict[str, int]:
 
 def render_markdown(board: dict[str, Any]) -> str:
     lines = [
-        "# Claw Code 2.0 Canonical Board",
+        "# SuprAI 2.0 Canonical Board",
         "",
         f"Generated: `{board['generated_at']}`",
         f"Roadmap SHA-256 prefix: `{board['sources']['roadmap']['sha256_prefix']}`",
@@ -423,7 +423,7 @@ def build_board(repo_root: Path) -> dict[str, Any]:
     roadmap_path = repo_root / "ROADMAP.md"
     source_omx = find_source_omx(repo_root)
     research = source_omx / "research"
-    plan_path = source_omx / "plans" / "claw-code-2-0-adaptive-plan.md"
+    plan_path = source_omx / "plans" / "SuprAI-2-0-adaptive-plan.md"
     headings, actions = parse_roadmap(roadmap_path)
     items = [roadmap_item(record, i) for i, record in enumerate(headings, 1)]
     items.extend(roadmap_item(record, i) for i, record in enumerate(actions, 1))
@@ -462,7 +462,7 @@ def build_board(repo_root: Path) -> dict[str, Any]:
                 "ordered_action_count": len(actions),
             },
             "approved_plan": {
-                "path": ".omx/plans/claw-code-2-0-adaptive-plan.md",
+                "path": ".omx/plans/SuprAI-2-0-adaptive-plan.md",
                 "sha256_prefix": sha256_prefix(plan_path),
             },
             "research": {

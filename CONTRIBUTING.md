@@ -1,6 +1,6 @@
-# Contributing to Claw Code
+# Contributing to SuprAI
 
-Thanks for helping improve Claw Code. This repository is a Rust-first CLI
+Thanks for helping improve SuprAI. This repository is a Rust-first CLI
 workspace with supporting docs and compatibility fixtures.
 
 ## Ground rules
@@ -18,8 +18,8 @@ workspace with supporting docs and compatibility fixtures.
 ## Local setup
 
 ```bash
-git clone https://github.com/ultraworkers/claw-code
-cd claw-code/rust
+git clone https://github.com/ultraworkers/SuprAI
+cd SuprAI/rust
 cargo build --workspace
 cargo test --workspace
 ```
@@ -28,9 +28,9 @@ On Windows PowerShell, build from the same `rust` workspace and run the binary
 with the `.exe` suffix:
 
 ```powershell
-cd claw-code\rust
+cd SuprAI\rust
 cargo build --workspace
-.\target\debug\claw.exe --help
+.\target\debug\suprai.exe --help
 ```
 
 ## Local pre-push build gate
@@ -46,7 +46,7 @@ custom `core.hooksPath`, copy or chain `.github/hooks/pre-push` instead. The hoo
 runs the ROADMAP id guard, then runs
 `cargo build --manifest-path rust/Cargo.toml --workspace --locked` from the
 repository root. If you must bypass the cargo build for a docs-only push, set
-`SKIP_CLAW_PRE_PUSH_BUILD=1`; the hook still runs the ROADMAP guard and prints
+`SKIP_SUPRAI_PRE_PUSH_BUILD=1` (or deprecated `SKIP_CLAW_PRE_PUSH_BUILD=1`); the hook still runs the ROADMAP guard and prints
 when the cargo-build escape hatch is used.
 
 ## ROADMAP id allocation

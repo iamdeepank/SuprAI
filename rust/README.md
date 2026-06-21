@@ -1,6 +1,6 @@
-# 🦞 Claw Code — Rust Implementation
+# SuprAI — Rust Implementation
 
-A high-performance Rust rewrite of the Claw Code CLI agent harness. Built for speed, safety, and native tool execution.
+A high-performance Rust rewrite of the SuprAI CLI agent harness. Built for speed, safety, and native tool execution.
 
 For a task-oriented guide with copy/paste examples, see [`../USAGE.md`](../USAGE.md).
 
@@ -92,8 +92,8 @@ Primary artifacts:
 | Sub-agent / agent surfaces | ✅ |
 | Todo tracking | ✅ |
 | Notebook editing | ✅ |
-| CLAUDE.md / CLAW.md / AGENTS.md project memory | ✅ |
-| Config file hierarchy (`.claw.json` + merged config sections) | ✅ |
+| CLAUDE.md / SUPRAI.md / AGENTS.md project memory | ✅ |
+| Config file hierarchy (`.suprai.json` + merged config sections) | ✅ |
 | Permission system | ✅ |
 | MCP server lifecycle + inspection | ✅ |
 | Session persistence + resume | ✅ |
@@ -123,11 +123,11 @@ Short names resolve to the latest model versions:
 Representative current surface:
 
 ```text
-claw [OPTIONS] [COMMAND]
+suprai [OPTIONS] [COMMAND]
 
 Flags:
   --model MODEL
-  --output-format text|json  (case-insensitive; CLAW_OUTPUT_FORMAT supplies the default, flags override env)
+  --output-format text|json  (case-insensitive; SUPRAI_OUTPUT_FORMAT supplies the default, flags override env)
   --permission-mode MODE
   --cwd PATH, -C PATH, --directory PATH
   --dangerously-skip-permissions, --skip-permissions
@@ -151,14 +151,14 @@ Top-level commands:
   init
 ```
 
-`claw acp` is a local discoverability surface for editor-first users: it reports the current ACP/Zed status without starting the runtime. As of April 16, 2026, claw-code does **not** ship an ACP/Zed daemon or JSON-RPC entrypoint yet, and `claw acp serve` is only a status alias until the real protocol surface lands. Status queries exit 0 and expose the same machine-readable contract via `--output-format json`; malformed ACP invocations exit 1 with `kind: unsupported_acp_invocation`.
-`--output-format` accepts `text` or `json` in any casing. `CLAW_OUTPUT_FORMAT=json` selects JSON as the default for non-interactive commands, explicit flags override it, repeated flags warn on stderr, and status JSON exposes `format_source`, `format_raw`, and `format_overridden`. Help and doctor output also surface `CLAW_LOG` / `RUST_LOG` as the logging environment knobs.
-`claw version --output-format json` is the provenance probe for automation: it reports full `git_sha`, derived `git_sha_short`, `is_dirty`, `branch`, `commit_date`, `commit_timestamp`, `rustc_version`, runtime `executable_path`, and `binary_provenance`; the text report is available as `human_readable` instead of a duplicate `message` field.
-`status --output-format json` reports loaded project memory files under `workspace.memory_files[]` with each file's `path`, `source` (`claude_md`, `claw_md`, `agents_md`, or scoped/rule sources), `origin`, `scope_path`, `outside_project`, `chars`, and `contributes`; `claw doctor --output-format json` includes a dedicated `memory` check. Root instruction-file priority is `CLAUDE.md`, then `CLAW.md`, then `AGENTS.md`, discovery is bounded to the current git root when present (otherwise cwd only), and all non-duplicate loaded files contribute to the rendered system prompt.
-`claw mcp --output-format json` reports partial MCP config success: valid servers remain in `servers[]` while malformed siblings appear in `invalid_servers[]`, with `total_configured`, `valid_count`, and `invalid_count` split out for automation. `status` mirrors this as `mcp_validation`, and doctor includes an `mcp validation` check.
+`suprai acp` is a local discoverability surface for editor-first users: it reports the current ACP/Zed status without starting the runtime. As of April 16, 2026, SuprAI does **not** ship an ACP/Zed daemon or JSON-RPC entrypoint yet, and `suprai acp serve` is only a status alias until the real protocol surface lands. Status queries exit 0 and expose the same machine-readable contract via `--output-format json`; malformed ACP invocations exit 1 with `kind: unsupported_acp_invocation`.
+`--output-format` accepts `text` or `json` in any casing. `SUPRAI_OUTPUT_FORMAT=json` selects JSON as the default for non-interactive commands, explicit flags override it, repeated flags warn on stderr, and status JSON exposes `format_source`, `format_raw`, and `format_overridden`. Help and doctor output also surface `SUPRAI_LOG` / `RUST_LOG` as the logging environment knobs.
+`suprai version --output-format json` is the provenance probe for automation: it reports full `git_sha`, derived `git_sha_short`, `is_dirty`, `branch`, `commit_date`, `commit_timestamp`, `rustc_version`, runtime `executable_path`, and `binary_provenance`; the text report is available as `human_readable` instead of a duplicate `message` field.
+`status --output-format json` reports loaded project memory files under `workspace.memory_files[]` with each file's `path`, `source` (`claude_md`, `suprai_md`, `agents_md`, or scoped/rule sources), `origin`, `scope_path`, `outside_project`, `chars`, and `contributes`; `suprai doctor --output-format json` includes a dedicated `memory` check. Root instruction-file priority is `CLAUDE.md`, then `SUPRAI.md`, then `AGENTS.md`, discovery is bounded to the current git root when present (otherwise cwd only), and all non-duplicate loaded files contribute to the rendered system prompt.
+`suprai mcp --output-format json` reports partial MCP config success: valid servers remain in `servers[]` while malformed siblings appear in `invalid_servers[]`, with `total_configured`, `valid_count`, and `invalid_count` split out for automation. `status` mirrors this as `mcp_validation`, and doctor includes an `mcp validation` check.
 `status --output-format json` also reports partial hook config success under `hook_validation`: valid hook entries are retained while malformed or unknown-event siblings appear in `invalid_hooks[]`, with `valid_count`, `invalid_count`, and typed `kind` fields (`invalid_hooks_config` or `unknown_hook_event`) for automation. `doctor --output-format json` includes a `hook validation` check, and `config --output-format json` includes `hook_validation` metadata with degraded status when invalid entries exist.
-Shorthand prompt mode honors the POSIX `--` end-of-flags separator, so `claw -- "-prompt-with-dash"` and unknown dash-prefixed non-flag text stay on the prompt path instead of being treated as CLI options.
-`claw dump-manifests` is self-contained: it emits the Rust resolver inventory for the selected workspace (commands, tools, agents, skills, and bootstrap phases) without requiring an upstream Claude Code TypeScript checkout. Use `--manifests-dir PATH` only to scope resolver discovery to another directory.
+Shorthand prompt mode honors the POSIX `--` end-of-flags separator, so `suprai -- "-prompt-with-dash"` and unknown dash-prefixed non-flag text stay on the prompt path instead of being treated as CLI options.
+`suprai dump-manifests` is self-contained: it emits the Rust resolver inventory for the selected workspace (commands, tools, agents, skills, and bootstrap phases) without requiring an upstream Claude Code TypeScript checkout. Use `--manifests-dir PATH` only to scope resolver discovery to another directory.
 
 The command surface is moving quickly. For the canonical live help text, run:
 
@@ -178,7 +178,7 @@ The REPL now exposes a much broader surface than the original minimal shell:
 - automation / analysis: `/review`, `/advisor`, `/insights`, `/security-review`, `/subagent`, `/team`, `/telemetry`, `/providers`, `/cron`, and more
 - plugin management: `/plugin` (with aliases `/plugins`, `/marketplace`)
 
-Notable claw-first surfaces now available directly in slash form:
+Notable SuprAI-first surfaces now available directly in slash form:
 - `/skills [list|show <name>|install <path>|uninstall <name>|help]`
 - `/agents [list|show <name>|create <name>|help]`
 - `/mcp [list|show <server>|help]`
@@ -201,7 +201,7 @@ rust/
     ├── mock-anthropic-service/ # Deterministic local Anthropic-compatible mock
     ├── plugins/            # Plugin metadata, manager, install/enable/disable surfaces
     ├── runtime/            # Session, config, permissions, MCP, prompts, auth/runtime loop
-    ├── rusty-claude-cli/   # Main CLI binary (`claw`)
+    ├── rusty-claude-cli/   # Main CLI binary (`suprai`)
     ├── telemetry/          # Session tracing and usage telemetry types
     └── tools/              # Built-in tools, skill resolution, tool search, agent runtime surfaces
 ```
@@ -222,7 +222,7 @@ rust/
 
 - **~20K lines** of Rust
 - **9 crates** in workspace
-- **Binary name:** `claw`
+- **Binary name:** `suprai`
 - **Default model:** `claude-opus-4-7`
 - **Default permissions:** `workspace-write`
 

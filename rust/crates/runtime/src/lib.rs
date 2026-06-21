@@ -1,4 +1,4 @@
-//! Core runtime primitives for the `claw` CLI and supporting crates.
+//! Core runtime primitives for the `suprai` CLI and supporting crates.
 //!
 //! This crate owns session persistence, permission evaluation, prompt assembly,
 //! MCP plumbing, tool-facing file operations, and the core conversation loop
@@ -73,7 +73,7 @@ pub use config::{
     McpWebSocketServerConfig, OAuthConfig, ProviderFallbackConfig, ResolvedPermissionMode,
     RulesImportConfig, RuntimeConfig, RuntimeFeatureConfig, RuntimeHookCommand, RuntimeHookConfig,
     RuntimeInvalidHookConfig, RuntimePermissionRuleConfig, RuntimePluginConfig,
-    RuntimeProviderConfig, ScopedMcpServerConfig, CLAW_SETTINGS_SCHEMA_NAME,
+    RuntimeProviderConfig, ScopedMcpServerConfig, SUPRAI_SETTINGS_SCHEMA_NAME,
 };
 pub use config_validate::{
     check_unsupported_format, format_diagnostics, validate_config_file, ConfigDiagnostic,

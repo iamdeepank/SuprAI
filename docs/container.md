@@ -1,9 +1,9 @@
-# Container-first claw-code workflows
+# Container-first SuprAI workflows
 
 This repo already had **container detection** in the Rust runtime before this document was added:
 
 - `rust/crates/runtime/src/sandbox.rs` detects Docker/Podman/container markers such as `/.dockerenv`, `/run/.containerenv`, matching env vars, and `/proc/1/cgroup` hints.
-- `rust/crates/rusty-claude-cli/src/main.rs` exposes that state through the `claw sandbox` / `cargo run -p rusty-claude-cli -- sandbox` report.
+- `rust/crates/rusty-claude-cli/src/main.rs` exposes that state through the `suprai sandbox` / `cargo run -p rusty-claude-cli -- sandbox` report.
 - `.github/workflows/rust-ci.yml` runs on `ubuntu-latest`, but it does **not** define a Docker or Podman container job.
 - Before this change, the repo did **not** have a checked-in `Dockerfile`, `Containerfile`, or `.devcontainer/` config.
 
@@ -22,13 +22,13 @@ From the repository root:
 ### Docker
 
 ```bash
-docker build -t claw-code-dev -f Containerfile .
+docker build -t SuprAI-dev -f Containerfile .
 ```
 
 ### Podman
 
 ```bash
-podman build -t claw-code-dev -f Containerfile .
+podman build -t SuprAI-dev -f Containerfile .
 ```
 
 ## Run `cargo test --workspace` in the container
@@ -42,7 +42,7 @@ docker run --rm -it \
   -v "$PWD":/workspace \
   -e CARGO_TARGET_DIR=/tmp/claw-target \
   -w /workspace/rust \
-  claw-code-dev \
+  SuprAI-dev \
   cargo test --workspace
 ```
 
@@ -53,7 +53,7 @@ podman run --rm -it \
   -v "$PWD":/workspace:Z \
   -e CARGO_TARGET_DIR=/tmp/claw-target \
   -w /workspace/rust \
-  claw-code-dev \
+  SuprAI-dev \
   cargo test --workspace
 ```
 
@@ -68,7 +68,7 @@ docker run --rm -it \
   -v "$PWD":/workspace \
   -e CARGO_TARGET_DIR=/tmp/claw-target \
   -w /workspace/rust \
-  claw-code-dev
+  SuprAI-dev
 ```
 
 ### Podman
@@ -78,7 +78,7 @@ podman run --rm -it \
   -v "$PWD":/workspace:Z \
   -e CARGO_TARGET_DIR=/tmp/claw-target \
   -w /workspace/rust \
-  claw-code-dev
+  SuprAI-dev
 ```
 
 Inside the shell:
@@ -94,7 +94,7 @@ The `sandbox` command is a useful sanity check: inside Docker or Podman it shoul
 
 ## Bind-mount this repo and another repo at the same time
 
-If you want to run `claw` against a second checkout while keeping `claw-code` itself mounted read-write:
+If you want to run `suprai` against a second checkout while keeping `SuprAI` itself mounted read-write:
 
 ### Docker
 
@@ -104,7 +104,7 @@ docker run --rm -it \
   -v "$HOME/src/other-repo":/repo \
   -e CARGO_TARGET_DIR=/tmp/claw-target \
   -w /workspace/rust \
-  claw-code-dev
+  SuprAI-dev
 ```
 
 ### Podman
@@ -115,7 +115,7 @@ podman run --rm -it \
   -v "$HOME/src/other-repo":/repo:Z \
   -e CARGO_TARGET_DIR=/tmp/claw-target \
   -w /workspace/rust \
-  claw-code-dev
+  SuprAI-dev
 ```
 
 Then, for example:

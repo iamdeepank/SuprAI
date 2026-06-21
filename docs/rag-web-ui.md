@@ -1,12 +1,12 @@
 # RAG и веб‑UI: архитектура и фазы
 
-Цель: **не** раздувать `claw-analog` и основной `claw` — вынести индексацию и (позже) UI в отдельные процессы с явными HTTP/MCP контрактами.
+Цель: **не** раздувать `suprai-analog` и основной `suprai` — вынести индексацию и (позже) UI в отдельные процессы с явными HTTP/MCP контрактами.
 
 ## Принципы
 
-1. **RAG как сервис** — отдельный бинарь (сейчас `claw-rag-service`), свой жизненный цикл, свои секреты (embedding API), своё хранилище.
-2. **Агент только вызывает retrieval** — в **`claw-analog`** инструмент **`retrieve_context`** → HTTP `POST {RAG_BASE_URL}/v1/query` (база без суффикса `/v1`); лимиты **`rag_timeout_secs`**, **`rag_top_k_max`** в `.claw-analog.toml`; ответ для модели — фрагменты с `path` + `snippet` + `score`.
-3. **Веб‑UI** — минимальная страница **`GET /`** в `claw-rag-service` (stats + форма `POST /v1/query`); чат с моделью и «переиндексировать» из браузера — при необходимости позже.
+1. **RAG как сервис** — отдельный бинарь (сейчас `suprai-rag-service`), свой жизненный цикл, свои секреты (embedding API), своё хранилище.
+2. **Агент только вызывает retrieval** — в **`suprai-analog`** инструмент **`retrieve_context`** → HTTP `POST {RAG_BASE_URL}/v1/query` (база без суффикса `/v1`); лимиты **`rag_timeout_secs`**, **`rag_top_k_max`** в `.claw-analog.toml`; ответ для модели — фрагменты с `path` + `snippet` + `score`.
+3. **Веб‑UI** — минимальная страница **`GET /`** в `suprai-rag-service` (stats + форма `POST /v1/query`); чат с моделью и «переиндексировать» из браузера — при необходимости позже.
 
 ## Компоненты (целевая картина)
 
@@ -41,7 +41,7 @@
 ### Индексация (фаза 1)
 
 ```powershell
-cd D:\path\to\claw-code-main\rust
+cd D:\path\to\SuprAI-main\rust
 $env:OPENAI_API_KEY = "sk-..."
 cargo run -p claw-rag-service -- ingest -w D:\path\to\repo --db D:\path\to\index.sqlite
 cargo run -p claw-analog -- ...   # при RAG_BASE_URL или rag_base_url в TOML — инструмент retrieve_context
@@ -69,10 +69,10 @@ cargo run -p claw-analog -- ...   # при RAG_BASE_URL или rag_base_url в T
 ## Риски и ограничения
 
 - Секреты и PII в индексе; размер индекса и стоимость эмбеддингов.
-- Согласованность с symlink/jail как в `claw-analog` — retrieval не должен «утекать» за пределы workspace.
+- Согласованность с symlink/jail как в `suprai-analog` — retrieval не должен «утекать» за пределы workspace.
 - Локаль на UI: i18n отдельно от `AnalogLanguage` в CLI.
 
 ## Связанные документы
 
 - Локальный запуск контейнеров (если поднимете векторку): [`container.md`](container.md).
-- Обзор `claw-analog`: [`how_to_run.md`](../how_to_run.md).
+- Обзор `suprai-analog`: [`how_to_run.md`](../how_to_run.md).

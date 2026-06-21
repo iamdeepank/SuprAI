@@ -175,7 +175,7 @@ impl SessionIdentity {
 pub struct LaneOwnership {
     /// Owner/assignee identity
     pub owner: String,
-    /// Workflow scope (e.g., claw-code-dogfood, external-git-maintenance)
+    /// Workflow scope (e.g., SuprAI-dogfood, external-git-maintenance)
     pub workflow_scope: String,
     /// Whether the watcher is expected to act, observe, or ignore
     pub watcher_action: WatcherAction,
@@ -1614,12 +1614,12 @@ mod tests {
     fn lane_ownership_binding_includes_workflow_scope() {
         let ownership = LaneOwnership {
             owner: "claw-1".to_string(),
-            workflow_scope: "claw-code-dogfood".to_string(),
+            workflow_scope: "SuprAI-dogfood".to_string(),
             watcher_action: WatcherAction::Act,
         };
 
         assert_eq!(ownership.owner, "claw-1");
-        assert_eq!(ownership.workflow_scope, "claw-code-dogfood");
+        assert_eq!(ownership.workflow_scope, "SuprAI-dogfood");
         assert_eq!(ownership.watcher_action, WatcherAction::Act);
     }
 
@@ -2382,7 +2382,7 @@ mod tests {
     fn lane_ownership_attached_to_metadata() {
         let ownership = LaneOwnership {
             owner: "bot-1".to_string(),
-            workflow_scope: "claw-code-dogfood".to_string(),
+            workflow_scope: "SuprAI-dogfood".to_string(),
             watcher_action: WatcherAction::Act,
         };
 
@@ -2399,7 +2399,7 @@ mod tests {
         assert_eq!(event.metadata.ownership.as_ref().unwrap().owner, "bot-1");
         assert_eq!(
             event.metadata.ownership.as_ref().unwrap().workflow_scope,
-            "claw-code-dogfood"
+            "SuprAI-dogfood"
         );
         assert_eq!(
             event.metadata.ownership.as_ref().unwrap().watcher_action,
@@ -2490,7 +2490,7 @@ mod tests {
 
         let observe_ownership = LaneOwnership {
             owner: "monitor-bot".to_string(),
-            workflow_scope: "claw-code-dogfood".to_string(),
+            workflow_scope: "SuprAI-dogfood".to_string(),
             watcher_action: WatcherAction::Observe,
         };
 

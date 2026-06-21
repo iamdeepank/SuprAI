@@ -60,7 +60,7 @@ pub fn run_validate(cli: ValidateCli) -> i32 {
     let mut ok = true;
     match &prof_path {
         None => println!(
-            "Profile: (none — no CLI/TOML path and no default ~/.claw-analog/profile.toml)"
+            "Profile: (none — no CLI/TOML path and no default ~/.suprai-analog/profile.toml)"
         ),
         Some(p) => match load_profile_hint(p) {
             Ok(Some(line)) => println!(

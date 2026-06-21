@@ -3820,7 +3820,7 @@ fn todo_store_path() -> Result<std::path::PathBuf, String> {
         return Ok(std::path::PathBuf::from(path));
     }
     let cwd = std::env::current_dir().map_err(|error| error.to_string())?;
-    Ok(cwd.join(".clawd-todos.json"))
+    Ok(cwd.join(".suprai-todos.json"))
 }
 
 fn resolve_skill_path(skill: &str) -> Result<std::path::PathBuf, String> {
@@ -3865,7 +3865,7 @@ fn skill_lookup_roots() -> Vec<SkillLookupRoot> {
         push_project_skill_lookup_roots(&mut roots, &cwd);
     }
 
-    if let Ok(claw_config_home) = std::env::var("CLAW_CONFIG_HOME") {
+    if let Ok(claw_config_home) = std::env::var("SUPRAI_CONFIG_HOME") {
         push_prefixed_skill_lookup_roots(&mut roots, std::path::Path::new(&claw_config_home));
     }
     if let Ok(codex_home) = std::env::var("CODEX_HOME") {
@@ -3894,7 +3894,7 @@ fn skill_lookup_roots() -> Vec<SkillLookupRoot> {
     }
     push_skill_lookup_root(
         &mut roots,
-        std::path::PathBuf::from("/home/bellman/.claw/skills"),
+        std::path::PathBuf::from("/home/bellman/.suprai/skills"),
         SkillLookupOrigin::SkillsDir,
     );
     push_skill_lookup_root(
@@ -3910,7 +3910,7 @@ fn push_project_skill_lookup_roots(roots: &mut Vec<SkillLookupRoot>, cwd: &std::
     for ancestor in cwd.ancestors() {
         push_prefixed_skill_lookup_roots(roots, &ancestor.join(".omc"));
         push_prefixed_skill_lookup_roots(roots, &ancestor.join(".agents"));
-        push_prefixed_skill_lookup_roots(roots, &ancestor.join(".claw"));
+        push_prefixed_skill_lookup_roots(roots, &ancestor.join(".suprai"));
         push_prefixed_skill_lookup_roots(roots, &ancestor.join(".codex"));
         push_prefixed_skill_lookup_roots(roots, &ancestor.join(".claude"));
     }
@@ -3918,7 +3918,7 @@ fn push_project_skill_lookup_roots(roots: &mut Vec<SkillLookupRoot>, cwd: &std::
 
 fn push_home_skill_lookup_roots(roots: &mut Vec<SkillLookupRoot>, home: &std::path::Path) {
     push_prefixed_skill_lookup_roots(roots, &home.join(".omc"));
-    push_prefixed_skill_lookup_roots(roots, &home.join(".claw"));
+    push_prefixed_skill_lookup_roots(roots, &home.join(".suprai"));
     push_prefixed_skill_lookup_roots(roots, &home.join(".codex"));
     push_prefixed_skill_lookup_roots(roots, &home.join(".claude"));
     push_skill_lookup_root(
@@ -5672,9 +5672,9 @@ fn agent_store_dir() -> Result<std::path::PathBuf, String> {
     }
     let cwd = std::env::current_dir().map_err(|error| error.to_string())?;
     if let Some(workspace_root) = cwd.ancestors().nth(2) {
-        return Ok(workspace_root.join(".clawd-agents"));
+        return Ok(workspace_root.join(".suprai-agents"));
     }
-    Ok(cwd.join(".clawd-agents"))
+    Ok(cwd.join(".suprai-agents"))
 }
 
 fn make_agent_id() -> String {
@@ -6408,12 +6408,12 @@ fn config_file_for_scope(scope: ConfigScope) -> Result<PathBuf, String> {
     let cwd = std::env::current_dir().map_err(|error| error.to_string())?;
     Ok(match scope {
         ConfigScope::Global => config_home_dir()?.join("settings.json"),
-        ConfigScope::Settings => cwd.join(".claw").join("settings.local.json"),
+        ConfigScope::Settings => cwd.join(".suprai").join("settings.local.json"),
     })
 }
 
 fn config_home_dir() -> Result<PathBuf, String> {
-    if let Ok(path) = std::env::var("CLAW_CONFIG_HOME") {
+    if let Ok(path) = std::env::var("SUPRAI_CONFIG_HOME") {
         return Ok(PathBuf::from(path));
     }
     let home = std::env::var("HOME")
@@ -6421,10 +6421,10 @@ fn config_home_dir() -> Result<PathBuf, String> {
         .map_err(|_| {
             String::from(
                 "HOME is not set (on Windows, set USERPROFILE or HOME, \
-                 or use CLAW_CONFIG_HOME to point directly at the config directory)",
+                 or use SUPRAI_CONFIG_HOME to point directly at the config directory)",
             )
         })?;
-    Ok(PathBuf::from(home).join(".claw"))
+    Ok(PathBuf::from(home).join(".suprai"))
 }
 
 fn read_json_object(path: &Path) -> Result<serde_json::Map<String, Value>, String> {
@@ -7126,9 +7126,9 @@ mod tests {
     #[test]
     fn worker_create_merges_config_trusted_roots_without_per_call_override() {
         use std::fs;
-        // Write a .claw/settings.json in a temp dir with trustedRoots
+        // Write a .suprai/settings.json in a temp dir with trustedRoots
         let worktree = temp_path("config-trust-worktree");
-        let claw_dir = worktree.join(".claw");
+        let claw_dir = worktree.join(".suprai");
         fs::create_dir_all(&claw_dir).expect("create .claw dir");
         // Use the actual OS temp dir so the worktree path matches the allowlist
         let tmp_root = std::env::temp_dir().to_str().expect("utf-8").to_string();
@@ -7161,7 +7161,7 @@ mod tests {
         use std::fs;
 
         let worktree = temp_path("config-and-call-trust-worktree");
-        let claw_dir = worktree.join(".claw");
+        let claw_dir = worktree.join(".suprai");
         fs::create_dir_all(&claw_dir).expect("create .claw dir");
         fs::write(
             claw_dir.join("settings.json"),
@@ -7333,7 +7333,7 @@ mod tests {
 
     #[test]
     fn recovery_loop_state_file_reflects_transitions() {
-        // End-to-end proof: .claw/worker-state.json reflects every transition
+        // End-to-end proof: .suprai/worker-state.json reflects every transition
         // through the stall-detect -> resolve-trust -> ready loop.
         use std::fs;
 
@@ -7341,7 +7341,7 @@ mod tests {
         let worktree = temp_path("recovery-loop-state");
         fs::create_dir_all(&worktree).expect("create worktree");
         let cwd = worktree.to_str().expect("utf-8").to_string();
-        let state_path = worktree.join(".claw").join("worker-state.json");
+        let state_path = worktree.join(".suprai").join("worker-state.json");
 
         // 1. Create worker WITHOUT trusted_roots
         let created = execute_tool("WorkerCreate", &json!({"cwd": cwd}))
@@ -8310,8 +8310,8 @@ mod tests {
     fn skill_resolves_project_local_skills_and_legacy_commands() {
         let _guard = env_guard();
         let root = temp_path("project-skills");
-        let skill_dir = root.join(".claw").join("skills").join("plan");
-        let command_dir = root.join(".claw").join("commands");
+        let skill_dir = root.join(".suprai").join("skills").join("plan");
+        let command_dir = root.join(".suprai").join("commands");
         fs::create_dir_all(&skill_dir).expect("skill dir should exist");
         fs::create_dir_all(&command_dir).expect("command dir should exist");
         fs::write(
@@ -8335,7 +8335,7 @@ mod tests {
         assert!(skill_output["path"]
             .as_str()
             .expect("path")
-            .ends_with(".claw/skills/plan/SKILL.md"));
+            .ends_with(".suprai/skills/plan/SKILL.md"));
 
         let command_result = execute_tool("Skill", &json!({ "skill": "/handoff" }))
             .expect("legacy command should resolve");
@@ -8344,7 +8344,7 @@ mod tests {
         assert!(command_output["path"]
             .as_str()
             .expect("path")
-            .ends_with(".claw/commands/handoff.md"));
+            .ends_with(".suprai/commands/handoff.md"));
 
         std::env::set_current_dir(&original_dir).expect("restore cwd");
         fs::remove_dir_all(root).expect("temp project should clean up");
@@ -8367,11 +8367,11 @@ mod tests {
         .expect("skill file should exist");
 
         let original_home = std::env::var("HOME").ok();
-        let original_config_home = std::env::var("CLAW_CONFIG_HOME").ok();
+        let original_config_home = std::env::var("SUPRAI_CONFIG_HOME").ok();
         let original_codex_home = std::env::var("CODEX_HOME").ok();
         let original_dir = std::env::current_dir().expect("cwd");
         std::env::set_var("HOME", &home);
-        std::env::remove_var("CLAW_CONFIG_HOME");
+        std::env::remove_var("SUPRAI_CONFIG_HOME");
         std::env::remove_var("CODEX_HOME");
         std::env::set_current_dir(&nested).expect("set cwd");
 
@@ -8391,8 +8391,8 @@ mod tests {
             None => std::env::remove_var("HOME"),
         }
         match original_config_home {
-            Some(value) => std::env::set_var("CLAW_CONFIG_HOME", value),
-            None => std::env::remove_var("CLAW_CONFIG_HOME"),
+            Some(value) => std::env::set_var("SUPRAI_CONFIG_HOME", value),
+            None => std::env::remove_var("SUPRAI_CONFIG_HOME"),
         }
         match original_codex_home {
             Some(value) => std::env::set_var("CODEX_HOME", value),
@@ -8425,11 +8425,11 @@ mod tests {
         .expect("agents skill file should exist");
 
         let original_home = std::env::var("HOME").ok();
-        let original_config_home = std::env::var("CLAW_CONFIG_HOME").ok();
+        let original_config_home = std::env::var("SUPRAI_CONFIG_HOME").ok();
         let original_codex_home = std::env::var("CODEX_HOME").ok();
         let original_dir = std::env::current_dir().expect("cwd");
         std::env::set_var("HOME", &home);
-        std::env::remove_var("CLAW_CONFIG_HOME");
+        std::env::remove_var("SUPRAI_CONFIG_HOME");
         std::env::remove_var("CODEX_HOME");
         std::env::set_current_dir(&nested).expect("set cwd");
 
@@ -8461,8 +8461,8 @@ mod tests {
             None => std::env::remove_var("HOME"),
         }
         match original_config_home {
-            Some(value) => std::env::set_var("CLAW_CONFIG_HOME", value),
-            None => std::env::remove_var("CLAW_CONFIG_HOME"),
+            Some(value) => std::env::set_var("SUPRAI_CONFIG_HOME", value),
+            None => std::env::remove_var("SUPRAI_CONFIG_HOME"),
         }
         match original_codex_home {
             Some(value) => std::env::set_var("CODEX_HOME", value),
@@ -8489,11 +8489,11 @@ mod tests {
         .expect("learned skill file should exist");
 
         let original_home = std::env::var("HOME").ok();
-        let original_config_home = std::env::var("CLAW_CONFIG_HOME").ok();
+        let original_config_home = std::env::var("SUPRAI_CONFIG_HOME").ok();
         let original_codex_home = std::env::var("CODEX_HOME").ok();
         let original_claude_config_dir = std::env::var("CLAUDE_CONFIG_DIR").ok();
         std::env::set_var("HOME", &home);
-        std::env::remove_var("CLAW_CONFIG_HOME");
+        std::env::remove_var("SUPRAI_CONFIG_HOME");
         std::env::remove_var("CODEX_HOME");
         std::env::set_var("CLAUDE_CONFIG_DIR", &claude_config_dir);
 
@@ -8512,8 +8512,8 @@ mod tests {
             None => std::env::remove_var("HOME"),
         }
         match original_config_home {
-            Some(value) => std::env::set_var("CLAW_CONFIG_HOME", value),
-            None => std::env::remove_var("CLAW_CONFIG_HOME"),
+            Some(value) => std::env::set_var("SUPRAI_CONFIG_HOME", value),
+            None => std::env::remove_var("SUPRAI_CONFIG_HOME"),
         }
         match original_codex_home {
             Some(value) => std::env::set_var("CODEX_HOME", value),
@@ -8548,11 +8548,11 @@ mod tests {
         .expect("direct command file should exist");
 
         let original_home = std::env::var("HOME").ok();
-        let original_config_home = std::env::var("CLAW_CONFIG_HOME").ok();
+        let original_config_home = std::env::var("SUPRAI_CONFIG_HOME").ok();
         let original_codex_home = std::env::var("CODEX_HOME").ok();
         let original_claude_config_dir = std::env::var("CLAUDE_CONFIG_DIR").ok();
         std::env::set_var("HOME", &home);
-        std::env::remove_var("CLAW_CONFIG_HOME");
+        std::env::remove_var("SUPRAI_CONFIG_HOME");
         std::env::remove_var("CODEX_HOME");
         std::env::set_var("CLAUDE_CONFIG_DIR", &claude_config_dir);
 
@@ -8584,8 +8584,8 @@ mod tests {
             None => std::env::remove_var("HOME"),
         }
         match original_config_home {
-            Some(value) => std::env::set_var("CLAW_CONFIG_HOME", value),
-            None => std::env::remove_var("CLAW_CONFIG_HOME"),
+            Some(value) => std::env::set_var("SUPRAI_CONFIG_HOME", value),
+            None => std::env::remove_var("SUPRAI_CONFIG_HOME"),
         }
         match original_codex_home {
             Some(value) => std::env::set_var("CODEX_HOME", value),
@@ -8615,11 +8615,11 @@ mod tests {
         .expect("legacy command file should exist");
 
         let original_home = std::env::var("HOME").ok();
-        let original_config_home = std::env::var("CLAW_CONFIG_HOME").ok();
+        let original_config_home = std::env::var("SUPRAI_CONFIG_HOME").ok();
         let original_codex_home = std::env::var("CODEX_HOME").ok();
         let original_dir = std::env::current_dir().expect("cwd");
         std::env::set_var("HOME", &home);
-        std::env::remove_var("CLAW_CONFIG_HOME");
+        std::env::remove_var("SUPRAI_CONFIG_HOME");
         std::env::remove_var("CODEX_HOME");
         std::env::set_current_dir(&nested).expect("set cwd");
 
@@ -8639,8 +8639,8 @@ mod tests {
             None => std::env::remove_var("HOME"),
         }
         match original_config_home {
-            Some(value) => std::env::set_var("CLAW_CONFIG_HOME", value),
-            None => std::env::remove_var("CLAW_CONFIG_HOME"),
+            Some(value) => std::env::set_var("SUPRAI_CONFIG_HOME", value),
+            None => std::env::remove_var("SUPRAI_CONFIG_HOME"),
         }
         match original_codex_home {
             Some(value) => std::env::set_var("CODEX_HOME", value),
@@ -10066,19 +10066,19 @@ mod tests {
         ));
         let home = root.join("home");
         let cwd = root.join("cwd");
-        std::fs::create_dir_all(home.join(".claw")).expect("home dir");
-        std::fs::create_dir_all(cwd.join(".claw")).expect("cwd dir");
+        std::fs::create_dir_all(home.join(".suprai")).expect("home dir");
+        std::fs::create_dir_all(cwd.join(".suprai")).expect("cwd dir");
         std::fs::write(
-            home.join(".claw").join("settings.json"),
+            home.join(".suprai").join("settings.json"),
             r#"{"verbose":false}"#,
         )
         .expect("write global settings");
 
         let original_home = std::env::var("HOME").ok();
-        let original_config_home = std::env::var("CLAW_CONFIG_HOME").ok();
+        let original_config_home = std::env::var("SUPRAI_CONFIG_HOME").ok();
         let original_dir = std::env::current_dir().expect("cwd");
         std::env::set_var("HOME", &home);
-        std::env::remove_var("CLAW_CONFIG_HOME");
+        std::env::remove_var("SUPRAI_CONFIG_HOME");
         std::env::set_current_dir(&cwd).expect("set cwd");
 
         let get = execute_tool("Config", &json!({"setting": "verbose"})).expect("get config");
@@ -10112,8 +10112,8 @@ mod tests {
             None => std::env::remove_var("HOME"),
         }
         match original_config_home {
-            Some(value) => std::env::set_var("CLAW_CONFIG_HOME", value),
-            None => std::env::remove_var("CLAW_CONFIG_HOME"),
+            Some(value) => std::env::set_var("SUPRAI_CONFIG_HOME", value),
+            None => std::env::remove_var("SUPRAI_CONFIG_HOME"),
         }
         let _ = std::fs::remove_dir_all(root);
     }
@@ -10132,19 +10132,19 @@ mod tests {
         ));
         let home = root.join("home");
         let cwd = root.join("cwd");
-        std::fs::create_dir_all(home.join(".claw")).expect("home dir");
-        std::fs::create_dir_all(cwd.join(".claw")).expect("cwd dir");
+        std::fs::create_dir_all(home.join(".suprai")).expect("home dir");
+        std::fs::create_dir_all(cwd.join(".suprai")).expect("cwd dir");
         std::fs::write(
-            cwd.join(".claw").join("settings.local.json"),
+            cwd.join(".suprai").join("settings.local.json"),
             r#"{"permissions":{"defaultMode":"acceptEdits"}}"#,
         )
         .expect("write local settings");
 
         let original_home = std::env::var("HOME").ok();
-        let original_config_home = std::env::var("CLAW_CONFIG_HOME").ok();
+        let original_config_home = std::env::var("SUPRAI_CONFIG_HOME").ok();
         let original_dir = std::env::current_dir().expect("cwd");
         std::env::set_var("HOME", &home);
-        std::env::remove_var("CLAW_CONFIG_HOME");
+        std::env::remove_var("SUPRAI_CONFIG_HOME");
         std::env::set_current_dir(&cwd).expect("set cwd");
 
         let enter = execute_tool("EnterPlanMode", &json!({})).expect("enter plan mode");
@@ -10154,11 +10154,11 @@ mod tests {
         assert_eq!(enter_output["previousLocalMode"], "acceptEdits");
         assert_eq!(enter_output["currentLocalMode"], "plan");
 
-        let local_settings = std::fs::read_to_string(cwd.join(".claw").join("settings.local.json"))
+        let local_settings = std::fs::read_to_string(cwd.join(".suprai").join("settings.local.json"))
             .expect("local settings after enter");
         assert!(local_settings.contains(r#""defaultMode": "plan""#));
         let state =
-            std::fs::read_to_string(cwd.join(".claw").join("tool-state").join("plan-mode.json"))
+            std::fs::read_to_string(cwd.join(".suprai").join("tool-state").join("plan-mode.json"))
                 .expect("plan mode state");
         assert!(state.contains(r#""hadLocalOverride": true"#));
         assert!(state.contains(r#""previousLocalMode": "acceptEdits""#));
@@ -10170,11 +10170,11 @@ mod tests {
         assert_eq!(exit_output["previousLocalMode"], "acceptEdits");
         assert_eq!(exit_output["currentLocalMode"], "acceptEdits");
 
-        let local_settings = std::fs::read_to_string(cwd.join(".claw").join("settings.local.json"))
+        let local_settings = std::fs::read_to_string(cwd.join(".suprai").join("settings.local.json"))
             .expect("local settings after exit");
         assert!(local_settings.contains(r#""defaultMode": "acceptEdits""#));
         assert!(!cwd
-            .join(".claw")
+            .join(".suprai")
             .join("tool-state")
             .join("plan-mode.json")
             .exists());
@@ -10185,8 +10185,8 @@ mod tests {
             None => std::env::remove_var("HOME"),
         }
         match original_config_home {
-            Some(value) => std::env::set_var("CLAW_CONFIG_HOME", value),
-            None => std::env::remove_var("CLAW_CONFIG_HOME"),
+            Some(value) => std::env::set_var("SUPRAI_CONFIG_HOME", value),
+            None => std::env::remove_var("SUPRAI_CONFIG_HOME"),
         }
         let _ = std::fs::remove_dir_all(root);
     }
@@ -10205,14 +10205,14 @@ mod tests {
         ));
         let home = root.join("home");
         let cwd = root.join("cwd");
-        std::fs::create_dir_all(home.join(".claw")).expect("home dir");
-        std::fs::create_dir_all(cwd.join(".claw")).expect("cwd dir");
+        std::fs::create_dir_all(home.join(".suprai")).expect("home dir");
+        std::fs::create_dir_all(cwd.join(".suprai")).expect("cwd dir");
 
         let original_home = std::env::var("HOME").ok();
-        let original_config_home = std::env::var("CLAW_CONFIG_HOME").ok();
+        let original_config_home = std::env::var("SUPRAI_CONFIG_HOME").ok();
         let original_dir = std::env::current_dir().expect("cwd");
         std::env::set_var("HOME", &home);
-        std::env::remove_var("CLAW_CONFIG_HOME");
+        std::env::remove_var("SUPRAI_CONFIG_HOME");
         std::env::set_current_dir(&cwd).expect("set cwd");
 
         let enter = execute_tool("EnterPlanMode", &json!({})).expect("enter plan mode");
@@ -10225,7 +10225,7 @@ mod tests {
         assert_eq!(exit_output["changed"], true);
         assert_eq!(exit_output["currentLocalMode"], serde_json::Value::Null);
 
-        let local_settings = std::fs::read_to_string(cwd.join(".claw").join("settings.local.json"))
+        let local_settings = std::fs::read_to_string(cwd.join(".suprai").join("settings.local.json"))
             .expect("local settings after exit");
         let local_settings_json: serde_json::Value =
             serde_json::from_str(&local_settings).expect("valid settings json");
@@ -10235,7 +10235,7 @@ mod tests {
             "permissions override should be removed on exit"
         );
         assert!(!cwd
-            .join(".claw")
+            .join(".suprai")
             .join("tool-state")
             .join("plan-mode.json")
             .exists());
@@ -10246,8 +10246,8 @@ mod tests {
             None => std::env::remove_var("HOME"),
         }
         match original_config_home {
-            Some(value) => std::env::set_var("CLAW_CONFIG_HOME", value),
-            None => std::env::remove_var("CLAW_CONFIG_HOME"),
+            Some(value) => std::env::set_var("SUPRAI_CONFIG_HOME", value),
+            None => std::env::remove_var("SUPRAI_CONFIG_HOME"),
         }
         let _ = std::fs::remove_dir_all(root);
     }
@@ -10736,7 +10736,7 @@ printf 'pwsh:%s' "$1"
             scope: TaskScope::Module,
             scope_path: Some("runtime/task system".to_string()),
             worktree: Some("/tmp/wt-packet".to_string()),
-            repo: "claw-code-parity".to_string(),
+            repo: "SuprAI-parity".to_string(),
             branch_policy: "origin/main only".to_string(),
             acceptance_tests: vec![
                 "cargo build --workspace".to_string(),
@@ -10763,7 +10763,7 @@ printf 'pwsh:%s' "$1"
         assert_eq!(output["status"], "created");
         assert_eq!(output["prompt"], "Ship packetized runtime task");
         assert_eq!(output["description"], "runtime/task system");
-        assert_eq!(output["task_packet"]["repo"], "claw-code-parity");
+        assert_eq!(output["task_packet"]["repo"], "SuprAI-parity");
         assert_eq!(output["task_packet"]["resources"][0]["kind"], "module");
         assert_eq!(
             output["task_packet"]["resources"][0]["value"],

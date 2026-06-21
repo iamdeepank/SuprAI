@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-const STARTER_CLAW_JSON: &str = concat!(
+const STARTER_SUPRAI_JSON: &str = concat!(
     "{\n",
     "  \"permissions\": {\n",
     "    \"defaultMode\": \"acceptEdits\"\n",
@@ -15,8 +15,8 @@ const STARTER_SETTINGS_JSON: &str = concat!(
     "  }\n",
     "}\n",
 );
-const GITIGNORE_COMMENT: &str = "# Claw Code local artifacts";
-const GITIGNORE_ENTRIES: [&str; 3] = [".claw/settings.local.json", ".claw/sessions/", ".clawhip/"];
+const GITIGNORE_COMMENT: &str = "# SuprAI local artifacts";
+const GITIGNORE_ENTRIES: [&str; 3] = [".suprai/settings.local.json", ".suprai/sessions/", ".clawhip/"];
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum InitStatus {
@@ -135,37 +135,37 @@ struct RepoDetection {
 pub(crate) fn initialize_repo(cwd: &Path) -> Result<InitReport, Box<dyn std::error::Error>> {
     let mut artifacts = Vec::new();
 
-    let claw_dir = cwd.join(".claw");
-    let claw_dir_status = ensure_dir(&claw_dir)?;
-    let settings_json = claw_dir.join("settings.json");
+    let suprai_dir = cwd.join(".suprai");
+    let suprai_dir_status = ensure_dir(&suprai_dir)?;
+    let settings_json = suprai_dir.join("settings.json");
     let settings_status = write_file_if_missing(&settings_json, STARTER_SETTINGS_JSON)?;
-    let claw_dir_status =
-        if claw_dir_status == InitStatus::Skipped && settings_status == InitStatus::Created {
+    let suprai_dir_status =
+        if suprai_dir_status == InitStatus::Skipped && settings_status == InitStatus::Created {
             InitStatus::Partial
         } else {
-            claw_dir_status
+            suprai_dir_status
         };
     artifacts.push(InitArtifact {
-        name: ".claw/",
-        status: claw_dir_status,
+        name: ".suprai/",
+        status: suprai_dir_status,
     });
     artifacts.push(InitArtifact {
-        name: ".claw/settings.json",
+        name: ".suprai/settings.json",
         status: settings_status,
     });
     artifacts.push(InitArtifact {
-        name: ".claw/sessions/",
-        status: if claw_dir.join("sessions").is_dir() {
+        name: ".suprai/sessions/",
+        status: if suprai_dir.join("sessions").is_dir() {
             InitStatus::Skipped
         } else {
             InitStatus::Deferred
         },
     });
 
-    let claw_json = cwd.join(".claw.json");
+    let suprai_json = cwd.join(".suprai.json");
     artifacts.push(InitArtifact {
-        name: ".claw.json",
-        status: write_file_if_missing(&claw_json, STARTER_CLAW_JSON)?,
+        name: ".suprai.json",
+        status: write_file_if_missing(&suprai_json, STARTER_SUPRAI_JSON)?,
     });
 
     let gitignore = cwd.join(".gitignore");
@@ -240,7 +240,7 @@ pub(crate) fn render_init_claude_md(cwd: &Path) -> String {
     let mut lines = vec![
         "# CLAUDE.md".to_string(),
         String::new(),
-        "This file provides guidance to Claw Code (clawcode.dev) when working with code in this repository.".to_string(),
+        "This file provides guidance to SuprAI when working with code in this repository.".to_string(),
         String::new(),
     ];
 
@@ -285,7 +285,7 @@ pub(crate) fn render_init_claude_md(cwd: &Path) -> String {
 
     lines.push("## Working agreement".to_string());
     lines.push("- Prefer small, reviewable changes and keep generated bootstrap files aligned with actual repo workflows.".to_string());
-    lines.push("- Keep shared defaults in `.claw.json`; reserve `.claw/settings.local.json` for machine-local overrides.".to_string());
+    lines.push("- Keep shared defaults in `.suprai.json`; reserve `.suprai/settings.local.json` for machine-local overrides.".to_string());
     lines.push("- Do not overwrite existing `CLAUDE.md` content automatically; update it intentionally when repo workflows change.".to_string());
     lines.push(String::new());
 
@@ -435,16 +435,16 @@ mod tests {
 
         let report = initialize_repo(&root).expect("init should succeed");
         let rendered = report.render();
-        assert!(rendered.contains(".claw/"));
-        assert!(rendered.contains(".claw.json"));
+        assert!(rendered.contains(".suprai/"));
+        assert!(rendered.contains(".suprai.json"));
         assert!(rendered.contains("created"));
         assert!(rendered.contains(".gitignore       created"));
         assert!(rendered.contains("CLAUDE.md        created"));
-        assert!(root.join(".claw").is_dir());
-        assert!(root.join(".claw.json").is_file());
+        assert!(root.join(".suprai").is_dir());
+        assert!(root.join(".suprai.json").is_file());
         assert!(root.join("CLAUDE.md").is_file());
         assert_eq!(
-            fs::read_to_string(root.join(".claw.json")).expect("read claw json"),
+            fs::read_to_string(root.join(".suprai.json")).expect("read suprai json"),
             concat!(
                 "{\n",
                 "  \"permissions\": {\n",
@@ -454,7 +454,7 @@ mod tests {
             )
         );
         assert_eq!(
-            fs::read_to_string(root.join(".claw").join("settings.json"))
+            fs::read_to_string(root.join(".suprai").join("settings.json"))
                 .expect("read project settings"),
             concat!(
                 "{\n",
@@ -465,12 +465,12 @@ mod tests {
             )
         );
         assert!(
-            !root.join(".claw").join("sessions").exists(),
+            !root.join(".suprai").join("sessions").exists(),
             "sessions directory should be deferred until first session save"
         );
         let gitignore = fs::read_to_string(root.join(".gitignore")).expect("read gitignore");
-        assert!(gitignore.contains(".claw/settings.local.json"));
-        assert!(gitignore.contains(".claw/sessions/"));
+        assert!(gitignore.contains(".suprai/settings.local.json"));
+        assert!(gitignore.contains(".suprai/sessions/"));
         assert!(gitignore.contains(".clawhip/"));
         let claude_md = fs::read_to_string(root.join("CLAUDE.md")).expect("read claude md");
         assert!(claude_md.contains("Languages: Rust."));
@@ -484,8 +484,8 @@ mod tests {
         let root = temp_dir();
         fs::create_dir_all(&root).expect("create root");
         fs::write(root.join("CLAUDE.md"), "custom guidance\n").expect("write existing claude md");
-        fs::write(root.join(".gitignore"), ".claw/settings.local.json\n").expect("write gitignore");
-        fs::create_dir_all(root.join(".claw")).expect("create existing .claw dir");
+        fs::write(root.join(".gitignore"), ".suprai/settings.local.json\n").expect("write gitignore");
+        fs::create_dir_all(root.join(".suprai")).expect("create existing .suprai dir");
 
         let first = initialize_repo(&root).expect("first init should succeed");
         assert!(first
@@ -493,17 +493,17 @@ mod tests {
             .contains("CLAUDE.md        skipped (already exists)"));
         assert_eq!(
             first.artifacts_with_status(InitStatus::Partial),
-            vec![".claw/".to_string()],
-            "existing .claw/ should report partial when init creates missing settings.json"
+            vec![".suprai/".to_string()],
+            "existing .suprai/ should report partial when init creates missing settings.json"
         );
-        assert!(root.join(".claw").join("settings.json").is_file());
+        assert!(root.join(".suprai").join("settings.json").is_file());
 
         let second = initialize_repo(&root).expect("second init should succeed");
         let second_rendered = second.render();
-        assert!(second_rendered.contains(".claw/"));
-        assert!(second_rendered.contains(".claw/settings.json"));
-        assert!(second_rendered.contains(".claw/sessions/"));
-        assert!(second_rendered.contains(".claw.json"));
+        assert!(second_rendered.contains(".suprai/"));
+        assert!(second_rendered.contains(".suprai/settings.json"));
+        assert!(second_rendered.contains(".suprai/sessions/"));
+        assert!(second_rendered.contains(".suprai.json"));
         assert!(second_rendered.contains("skipped (already exists)"));
         assert!(second_rendered.contains(".gitignore       skipped (already exists)"));
         assert!(second_rendered.contains("CLAUDE.md        skipped (already exists)"));
@@ -512,8 +512,8 @@ mod tests {
             "custom guidance\n"
         );
         let gitignore = fs::read_to_string(root.join(".gitignore")).expect("read gitignore");
-        assert_eq!(gitignore.matches(".claw/settings.local.json").count(), 1);
-        assert_eq!(gitignore.matches(".claw/sessions/").count(), 1);
+        assert_eq!(gitignore.matches(".suprai/settings.local.json").count(), 1);
+        assert_eq!(gitignore.matches(".suprai/sessions/").count(), 1);
         assert_eq!(gitignore.matches(".clawhip/").count(), 1);
 
         fs::remove_dir_all(root).expect("cleanup temp dir");
@@ -532,9 +532,9 @@ mod tests {
         assert_eq!(
             created_names,
             vec![
-                ".claw/".to_string(),
-                ".claw/settings.json".to_string(),
-                ".claw.json".to_string(),
+                ".suprai/".to_string(),
+                ".suprai/settings.json".to_string(),
+                ".suprai.json".to_string(),
                 ".gitignore".to_string(),
                 "CLAUDE.md".to_string(),
             ],
@@ -546,7 +546,7 @@ mod tests {
         );
         assert_eq!(
             fresh.artifacts_with_status(InitStatus::Deferred),
-            vec![".claw/sessions/".to_string()],
+            vec![".suprai/sessions/".to_string()],
             "fresh init should report session storage as deferred"
         );
 
@@ -555,9 +555,9 @@ mod tests {
         assert_eq!(
             skipped_names,
             vec![
-                ".claw/".to_string(),
-                ".claw/settings.json".to_string(),
-                ".claw.json".to_string(),
+                ".suprai/".to_string(),
+                ".suprai/settings.json".to_string(),
+                ".suprai.json".to_string(),
                 ".gitignore".to_string(),
                 "CLAUDE.md".to_string(),
             ],
@@ -569,7 +569,7 @@ mod tests {
         );
         assert_eq!(
             second.artifacts_with_status(InitStatus::Deferred),
-            vec![".claw/sessions/".to_string()],
+            vec![".suprai/sessions/".to_string()],
             "idempotent init should keep session storage deferred until first save"
         );
 
@@ -580,7 +580,7 @@ mod tests {
         for entry in &entries {
             let name = entry.get("name").and_then(|v| v.as_str()).unwrap();
             let status = entry.get("status").and_then(|v| v.as_str()).unwrap();
-            if name == ".claw/sessions/" {
+            if name == ".suprai/sessions/" {
                 assert_eq!(status, "deferred");
             } else {
                 assert_eq!(

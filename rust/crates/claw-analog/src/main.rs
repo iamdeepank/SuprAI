@@ -73,7 +73,7 @@ impl From<PresetCli> for Preset {
 #[command(
     name = "claw-analog",
     version,
-    about = "Lean tool-agent loop (read/list/grep/write) on claw-code `api` providers"
+    about = "Lean tool-agent loop (read/list/grep/write) on SuprAI `api` providers"
 )]
 #[command(args_conflicts_with_subcommands = true)]
 struct RootCli {

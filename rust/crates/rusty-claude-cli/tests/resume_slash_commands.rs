@@ -56,7 +56,7 @@ fn resumed_binary_accepts_slash_commands_with_arguments() {
     assert!(stdout.contains("Session cleared"));
     assert!(stdout.contains("Mode             resumed session reset"));
     assert!(stdout.contains("Previous session"));
-    assert!(stdout.contains("Resume previous  claw --resume"));
+    assert!(stdout.contains("Resume previous  suprai --resume"));
     assert!(stdout.contains("Backup           "));
     assert!(stdout.contains("Session file     "));
 
@@ -117,8 +117,8 @@ fn resumed_config_command_loads_settings_files_end_to_end() {
     // given
     let temp_dir = unique_temp_dir("resume-config");
     let project_dir = temp_dir.join("project");
-    let config_home = temp_dir.join("home").join(".claw");
-    fs::create_dir_all(project_dir.join(".claw")).expect("project config dir should exist");
+    let config_home = temp_dir.join("home").join(".suprai");
+    fs::create_dir_all(project_dir.join(".suprai")).expect("project config dir should exist");
     fs::create_dir_all(&config_home).expect("config home should exist");
 
     let session_path = project_dir.join("session.jsonl");
@@ -130,7 +130,7 @@ fn resumed_config_command_loads_settings_files_end_to_end() {
     fs::write(config_home.join("settings.json"), r#"{"model":"haiku"}"#)
         .expect("user config should write");
     fs::write(
-        project_dir.join(".claw").join("settings.local.json"),
+        project_dir.join(".suprai").join("settings.local.json"),
         r#"{"model":"opus"}"#,
     )
     .expect("local config should write");
@@ -144,7 +144,7 @@ fn resumed_config_command_loads_settings_files_end_to_end() {
             "/config",
             "model",
         ],
-        &[("CLAW_CONFIG_HOME", config_home.to_str().expect("utf8 path"))],
+        &[("SUPRAI_CONFIG_HOME", config_home.to_str().expect("utf8 path"))],
     );
 
     // then
@@ -166,7 +166,7 @@ fn resumed_config_command_loads_settings_files_end_to_end() {
     ));
     assert!(stdout.contains(
         project_dir
-            .join(".claw")
+            .join(".suprai")
             .join("settings.local.json")
             .to_str()
             .expect("utf8 path")
@@ -234,7 +234,7 @@ fn resume_latest_missing_session_fails_without_creating_session_dirs_435() {
     fs::create_dir_all(&home).expect("home should exist");
     let envs = [
         (
-            "CLAW_CONFIG_HOME",
+            "SUPRAI_CONFIG_HOME",
             config_home.to_str().expect("utf8 config home"),
         ),
         ("HOME", home.to_str().expect("utf8 home")),
@@ -284,8 +284,8 @@ fn resume_latest_missing_session_fails_without_creating_session_dirs_435() {
     assert_eq!(parsed["action"], "restore");
     assert_eq!(parsed["error_kind"], "no_managed_sessions");
     assert!(
-        !project_dir.join(".claw").exists(),
-        "failed resume must not create .claw/session directories"
+        !project_dir.join(".suprai").exists(),
+        "failed resume must not create .suprai/session directories"
     );
 }
 
@@ -307,7 +307,7 @@ fn resumed_status_command_emits_structured_json_when_requested() {
         .expect("session should persist");
 
     // when
-    // Use an isolated CLAW_CONFIG_HOME so ~/.claw/settings.json is not loaded,
+    // Use an isolated SUPRAI_CONFIG_HOME so ~/.suprai/settings.json is not loaded,
     // which would cause loaded_config_files to be non-zero (#65).
     let output = run_claw_with_env(
         &temp_dir,
@@ -318,7 +318,7 @@ fn resumed_status_command_emits_structured_json_when_requested() {
             session_path.to_str().expect("utf8 path"),
             "/status",
         ],
-        &[("CLAW_CONFIG_HOME", config_home.to_str().expect("utf8 path"))],
+        &[("SUPRAI_CONFIG_HOME", config_home.to_str().expect("utf8 path"))],
     );
 
     // then
@@ -622,12 +622,12 @@ fn workspace_session(root: &Path) -> Session {
 }
 
 fn run_claw_with_env(current_dir: &Path, args: &[&str], envs: &[(&str, &str)]) -> Output {
-    let mut command = Command::new(env!("CARGO_BIN_EXE_claw"));
+    let mut command = Command::new(env!("CARGO_BIN_EXE_suprai"));
     command.current_dir(current_dir).args(args);
     for (key, value) in envs {
         command.env(key, value);
     }
-    command.output().expect("claw should launch")
+    command.output().expect("suprai should launch")
 }
 
 fn unique_temp_dir(label: &str) -> PathBuf {

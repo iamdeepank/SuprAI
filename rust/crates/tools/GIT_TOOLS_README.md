@@ -1,6 +1,6 @@
 # Git-Aware Context Tools
 
-Adds five native git tools to claw-code that provide structured, read-only access to repository state. These replace ad-hoc `git` commands via bash with purpose-built tool definitions the model can discover and invoke directly.
+Adds five native git tools to SuprAI that provide structured, read-only access to repository state. These replace ad-hoc `git` commands via bash with purpose-built tool definitions the model can discover and invoke directly.
 
 ## Tools
 

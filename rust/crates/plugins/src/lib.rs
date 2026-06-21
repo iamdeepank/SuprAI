@@ -1053,22 +1053,22 @@ impl PluginManager {
     /// Returns the default bundled plugins root directory.
     ///
     /// Resolution order (first existing path wins):
-    /// 1. `<exe_dir>/../share/claw/plugins/bundled` — standard install layout
+    /// 1. `<exe_dir>/../share/suprai/plugins/bundled` — standard install layout
     /// 2. `<exe_dir>/bundled` — simple relocated layout
     /// 3. `CARGO_MANIFEST_DIR/bundled` — dev/source-tree fallback (only if it exists)
-    /// 4. `<exe_dir>/../share/claw/plugins/bundled` — canonical default even if missing
+    /// 4. `<exe_dir>/../share/suprai/plugins/bundled` — canonical default even if missing
     ///
     /// This avoids baking in a compile-time source-tree path that may be
     /// inaccessible at runtime (e.g. a root-owned repo directory).
     #[must_use]
     pub fn bundled_root() -> PathBuf {
-        // Candidate 1: standard FHS install layout — <prefix>/bin/claw -> <prefix>/share/claw/plugins/bundled
+        // Candidate 1: standard FHS install layout — <prefix>/bin/suprai -> <prefix>/share/suprai/plugins/bundled
         if let Ok(exe_path) = std::env::current_exe() {
             if let Some(exe_dir) = exe_path.parent() {
                 let share_path = exe_dir
                     .join("..")
                     .join("share")
-                    .join("claw")
+                    .join("suprai")
                     .join("plugins")
                     .join("bundled");
                 if share_path.exists() {
@@ -1096,7 +1096,7 @@ impl PluginManager {
                 return exe_dir
                     .join("..")
                     .join("share")
-                    .join("claw")
+                    .join("suprai")
                     .join("plugins")
                     .join("bundled");
             }
@@ -1698,15 +1698,15 @@ fn detect_claude_code_manifest_contract_gaps(
     for (field, detail) in [
         (
             "skills",
-            "plugin manifest field `skills` uses the Claude Code plugin contract; `claw` does not load plugin-managed skills and instead discovers skills from local roots such as `.claw/skills`, `.omc/skills`, `.agents/skills`, `~/.omc/skills`, and `~/.claude/skills/omc-learned`.",
+            "plugin manifest field `skills` uses the Claude Code plugin contract; `suprai` does not load plugin-managed skills and instead discovers skills from local roots such as `.suprai/skills`, `.omc/skills`, `.agents/skills`, `~/.omc/skills`, and `~/.claude/skills/omc-learned`.",
         ),
         (
             "mcpServers",
-            "plugin manifest field `mcpServers` uses the Claude Code plugin contract; `claw` does not import MCP servers from plugin manifests.",
+            "plugin manifest field `mcpServers` uses the Claude Code plugin contract; `suprai` does not import MCP servers from plugin manifests.",
         ),
         (
             "agents",
-            "plugin manifest field `agents` uses the Claude Code plugin contract; `claw` does not load plugin-managed agent markdown catalogs from plugin manifests.",
+            "plugin manifest field `agents` uses the Claude Code plugin contract; `suprai` does not load plugin-managed agent markdown catalogs from plugin manifests.",
         ),
     ] {
         if root.contains_key(field) {
@@ -1722,7 +1722,7 @@ fn detect_claude_code_manifest_contract_gaps(
         .is_some_and(|commands| commands.iter().any(Value::is_string))
     {
         errors.push(PluginManifestValidationError::UnsupportedManifestContract {
-            detail: "plugin manifest field `commands` uses Claude Code-style directory globs; `claw` slash dispatch is still built-in and does not load plugin slash command markdown files.".to_string(),
+            detail: "plugin manifest field `commands` uses Claude Code-style directory globs; `suprai` slash dispatch is still built-in and does not load plugin slash command markdown files.".to_string(),
         });
     }
 
@@ -1734,7 +1734,7 @@ fn detect_claude_code_manifest_contract_gaps(
             ) {
                 errors.push(PluginManifestValidationError::UnsupportedManifestContract {
                     detail: format!(
-                        "plugin hook `{hook_name}` uses the Claude Code lifecycle contract; `claw` plugins currently support only PreToolUse, PostToolUse, and PostToolUseFailure."
+                        "plugin hook `{hook_name}` uses the Claude Code lifecycle contract; `suprai` plugins currently support only PreToolUse, PostToolUse, and PostToolUseFailure."
                     ),
                 });
             }
@@ -2359,7 +2359,7 @@ fn ensure_object<'a>(root: &'a mut Map<String, Value>, key: &str) -> &'a mut Map
 }
 
 /// Environment variable lock for test isolation.
-/// Guards against concurrent modification of `CLAW_CONFIG_HOME`.
+/// Guards against concurrent modification of `SUPRAI_CONFIG_HOME`.
 #[cfg(test)]
 fn env_lock() -> &'static std::sync::Mutex<()> {
     static ENV_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
@@ -3722,18 +3722,18 @@ mod tests {
         let _ = fs::remove_dir_all(bundled_root);
     }
 
-    /// Regression test for ROADMAP #41: verify that `CLAW_CONFIG_HOME` isolation prevents
-    /// host `~/.claw/plugins/` from bleeding into test runs.
+    /// Regression test for ROADMAP #41: verify that `SUPRAI_CONFIG_HOME` isolation prevents
+    /// host `~/.suprai/plugins/` from bleeding into test runs.
     #[test]
     fn claw_config_home_isolation_prevents_host_plugin_leakage() {
         let _guard = env_guard();
 
-        // Create a temp directory to act as our isolated CLAW_CONFIG_HOME
+        // Create a temp directory to act as our isolated SUPRAI_CONFIG_HOME
         let config_home = temp_dir("isolated-home");
         let bundled_root = temp_dir("isolated-bundled");
 
-        // Set CLAW_CONFIG_HOME to our temp directory
-        std::env::set_var("CLAW_CONFIG_HOME", &config_home);
+        // Set SUPRAI_CONFIG_HOME to our temp directory
+        std::env::set_var("SUPRAI_CONFIG_HOME", &config_home);
 
         // Create a test fixture plugin in the isolated config home
         let install_root = config_home.join("plugins").join("installed");
@@ -3747,7 +3747,7 @@ mod tests {
 }"#,
         );
 
-        // Create PluginManager with isolated bundled_root - it should use the temp config_home, not host ~/.claw/
+        // Create PluginManager with isolated bundled_root - it should use the temp config_home, not host ~/.suprai/
         let mut config = PluginManagerConfig::new(&config_home);
         config.bundled_root = Some(bundled_root.clone());
         let manager = PluginManager::new(config);
@@ -3761,7 +3761,7 @@ mod tests {
         assert_eq!(
             installed.len(),
             1,
-            "should only see the test fixture plugin, not host ~/.claw/plugins/"
+            "should only see the test fixture plugin, not host ~/.suprai/plugins/"
         );
         assert_eq!(
             installed[0].metadata.id, "isolated-test-plugin@external",
@@ -3769,7 +3769,7 @@ mod tests {
         );
 
         // Cleanup
-        std::env::remove_var("CLAW_CONFIG_HOME");
+        std::env::remove_var("SUPRAI_CONFIG_HOME");
         let _ = fs::remove_dir_all(config_home);
         let _ = fs::remove_dir_all(bundled_root);
     }

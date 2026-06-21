@@ -231,7 +231,7 @@ const SLASH_COMMAND_SPECS: &[SlashCommandSpec] = &[
     SlashCommandSpec {
         name: "plugin",
         aliases: &["plugins", "marketplace"],
-        summary: "Manage Claw Code plugins",
+        summary: "Manage SuprAI plugins",
         argument_hint: Some(
             "[list|install <path>|enable <name>|disable <name>|uninstall <id>|update <id>]",
         ),
@@ -2453,7 +2453,7 @@ pub fn handle_agents_slash_command(args: Option<&str>, cwd: &Path) -> std::io::R
             if filter.starts_with('-') {
                 return Err(std::io::Error::new(
                     std::io::ErrorKind::InvalidInput,
-                    format!("unknown option for `agents list`: {filter}\nUsage: claw agents list [<filter>]\nFilters are name substrings, not flags."),
+                    format!("unknown option for `agents list`: {filter}\nUsage: suprai agents list [<filter>]\nFilters are name substrings, not flags."),
                 ));
             }
             let roots = discover_definition_roots(cwd, "agents");
@@ -2485,7 +2485,7 @@ pub fn handle_agents_slash_command(args: Option<&str>, cwd: &Path) -> std::io::R
                 let extra = name_raw.split_once(' ').map(|(_, e)| e).unwrap_or("");
                 return Err(std::io::Error::new(
                     std::io::ErrorKind::InvalidInput,
-                    format!("unexpected extra arguments after agent name\nUsage: claw agents show <name>\nUnexpected extra: '{extra}'"),
+                    format!("unexpected extra arguments after agent name\nUsage: suprai agents show <name>\nUnexpected extra: '{extra}'"),
                 ));
             }
             let roots = discover_definition_roots(cwd, "agents");
@@ -2504,7 +2504,7 @@ pub fn handle_agents_slash_command(args: Option<&str>, cwd: &Path) -> std::io::R
         }
         Some("create") => Err(std::io::Error::new(
             std::io::ErrorKind::InvalidInput,
-            "missing_argument: agents create requires an agent name.\nUsage: claw agents create <name>",
+            "missing_argument: agents create requires an agent name.\nUsage: suprai agents create <name>",
         )),
         Some(args) if args.starts_with("create ") => {
             let mut parts = args.split_whitespace();
@@ -2512,13 +2512,13 @@ pub fn handle_agents_slash_command(args: Option<&str>, cwd: &Path) -> std::io::R
             let Some(name) = parts.next() else {
                 return Err(std::io::Error::new(
                     std::io::ErrorKind::InvalidInput,
-                    "missing_argument: agents create requires an agent name.\nUsage: claw agents create <name>",
+                    "missing_argument: agents create requires an agent name.\nUsage: suprai agents create <name>",
                 ));
             };
             if let Some(extra) = parts.next() {
                 return Err(std::io::Error::new(
                     std::io::ErrorKind::InvalidInput,
-                    format!("unexpected extra arguments after agent name\nUsage: claw agents create <name>\nUnexpected extra: '{extra}'"),
+                    format!("unexpected extra arguments after agent name\nUsage: suprai agents create <name>\nUnexpected extra: '{extra}'"),
                 ));
             }
             let agent = create_agent(name, cwd)?;
@@ -2559,7 +2559,7 @@ pub fn handle_agents_slash_command_json(args: Option<&str>, cwd: &Path) -> std::
                     "status": "error",
                     "error_kind": "unknown_option",
                     "unexpected": filter,
-                    "hint": "Usage: claw agents list [<filter>]\nFilters are name substrings, not flags.",
+                    "hint": "Usage: suprai agents list [<filter>]\nFilters are name substrings, not flags.",
                 }));
             }
             let roots = discover_definition_roots(cwd, "agents");
@@ -2609,7 +2609,7 @@ pub fn handle_agents_slash_command_json(args: Option<&str>, cwd: &Path) -> std::
                     "status": "error",
                     "error_kind": "unexpected_extra_args",
                     "unexpected": extra_token,
-                    "hint": format!("Usage: claw agents show <name>\nUnexpected extra: '{extra_token}'"),
+                    "hint": format!("Usage: suprai agents show <name>\nUnexpected extra: '{extra_token}'"),
                 }));
             }
             let roots = discover_definition_roots(cwd, "agents");
@@ -2629,7 +2629,7 @@ pub fn handle_agents_slash_command_json(args: Option<&str>, cwd: &Path) -> std::
                     // #734: parity with skills show which always emits a message field
                     "message": format!("agent '{}' not found", name),
                     // #760: hint so callers know how to enumerate available agents
-                    "hint": "Run `claw agents list` to see available agents.",
+                    "hint": "Run `suprai agents list` to see available agents.",
                 }));
             }
             let matched_collection = AgentCollection {
@@ -2656,7 +2656,7 @@ pub fn handle_agents_slash_command_json(args: Option<&str>, cwd: &Path) -> std::
                     "status": "error",
                     "error_kind": "unexpected_extra_args",
                     "unexpected": extra,
-                    "hint": format!("Usage: claw agents create <name>\nUnexpected extra: '{extra}'"),
+                    "hint": format!("Usage: suprai agents create <name>\nUnexpected extra: '{extra}'"),
                 }));
             }
             match create_agent(name, cwd) {
@@ -2719,7 +2719,7 @@ pub fn handle_skills_slash_command(args: Option<&str>, cwd: &Path) -> std::io::R
             if filter.starts_with('-') {
                 return Err(std::io::Error::new(
                     std::io::ErrorKind::InvalidInput,
-                    format!("unknown option for `skills list`: {filter}\nUsage: claw skills list [<filter>]\nFilters are name substrings, not flags."),
+                    format!("unknown option for `skills list`: {filter}\nUsage: suprai skills list [<filter>]\nFilters are name substrings, not flags."),
                 ));
             }
             let roots = discover_skill_roots(cwd);
@@ -2751,7 +2751,7 @@ pub fn handle_skills_slash_command(args: Option<&str>, cwd: &Path) -> std::io::R
                 let extra = name_raw.split_once(' ').map(|(_, e)| e).unwrap_or("");
                 return Err(std::io::Error::new(
                     std::io::ErrorKind::InvalidInput,
-                    format!("unexpected extra arguments after skill name\nUsage: claw skills show <name>\nUnexpected extra: '{extra}'"),
+                    format!("unexpected extra arguments after skill name\nUsage: suprai skills show <name>\nUnexpected extra: '{extra}'"),
                 ));
             }
             let roots = discover_skill_roots(cwd);
@@ -2764,14 +2764,14 @@ pub fn handle_skills_slash_command(args: Option<&str>, cwd: &Path) -> std::io::R
             if matched.is_empty() {
                 return Err(std::io::Error::new(
                     std::io::ErrorKind::NotFound,
-                    format!("skill '{name_raw}' not found\nRun `claw skills list` to see available skills."),
+                    format!("skill '{name_raw}' not found\nRun `suprai skills list` to see available skills."),
                 ));
             }
             Ok(render_skills_report(&matched))
         }
         Some("install") => Err(std::io::Error::new(
             std::io::ErrorKind::InvalidInput,
-            "missing_argument: skills install requires an install source.\nUsage: claw skills install <path>",
+            "missing_argument: skills install requires an install source.\nUsage: suprai skills install <path>",
         )),
         // #95: support --project flag for project-level install
         Some(args) if args.starts_with("install ") => {
@@ -2784,11 +2784,11 @@ pub fn handle_skills_slash_command(args: Option<&str>, cwd: &Path) -> std::io::R
             if target.is_empty() {
                 return Err(std::io::Error::new(
                     std::io::ErrorKind::InvalidInput,
-                    "missing_argument: skills install requires an install source.\nUsage: claw skills install [--project] <path>",
+                    "missing_argument: skills install requires an install source.\nUsage: suprai skills install [--project] <path>",
                 ));
             }
             let install = if project_flag {
-                let project_root = cwd.join(".claw").join("skills");
+                let project_root = cwd.join(".suprai").join("skills");
                 install_skill_into(target, cwd, &project_root)?
             } else {
                 install_skill(target, cwd)?
@@ -2797,7 +2797,7 @@ pub fn handle_skills_slash_command(args: Option<&str>, cwd: &Path) -> std::io::R
         }
         Some("uninstall" | "remove" | "delete") => Err(std::io::Error::new(
             std::io::ErrorKind::InvalidInput,
-            "missing_argument: skills uninstall requires a skill name.\nUsage: claw skills uninstall <name>",
+            "missing_argument: skills uninstall requires a skill name.\nUsage: suprai skills uninstall <name>",
         )),
         Some(args)
             if args.starts_with("uninstall ")
@@ -2809,7 +2809,7 @@ pub fn handle_skills_slash_command(args: Option<&str>, cwd: &Path) -> std::io::R
             if target.is_empty() {
                 return Err(std::io::Error::new(
                     std::io::ErrorKind::InvalidInput,
-                    "missing_argument: skills uninstall requires a skill name.\nUsage: claw skills uninstall <name>",
+                    "missing_argument: skills uninstall requires a skill name.\nUsage: suprai skills uninstall <name>",
                 ));
             }
             match uninstall_skill(target)? {
@@ -2821,7 +2821,7 @@ pub fn handle_skills_slash_command(args: Option<&str>, cwd: &Path) -> std::io::R
                 } => Err(std::io::Error::new(
                     std::io::ErrorKind::NotFound,
                     format!(
-                        "skill '{requested}' not found\nAvailable skills: {}\nRun `claw skills list` to see available skills.",
+                        "skill '{requested}' not found\nAvailable skills: {}\nRun `suprai skills list` to see available skills.",
                         format_optional_list(&available_names)
                     ),
                 )),
@@ -2860,7 +2860,7 @@ pub fn handle_skills_slash_command_json(args: Option<&str>, cwd: &Path) -> std::
                     "status": "error",
                     "error_kind": "unknown_option",
                     "unexpected": filter,
-                    "hint": "Usage: claw skills list [<filter>]\nFilters are name substrings, not flags.",
+                    "hint": "Usage: suprai skills list [<filter>]\nFilters are name substrings, not flags.",
                 }));
             }
             let roots = discover_skill_roots(cwd);
@@ -2909,7 +2909,7 @@ pub fn handle_skills_slash_command_json(args: Option<&str>, cwd: &Path) -> std::
                     "status": "error",
                     "error_kind": "unexpected_extra_args",
                     "unexpected": extra_token,
-                    "hint": format!("Usage: claw skills show <name>\nUnexpected extra: '{extra_token}'"),
+                    "hint": format!("Usage: suprai skills show <name>\nUnexpected extra: '{extra_token}'"),
                 }));
             }
             let roots = discover_skill_roots(cwd);
@@ -2929,7 +2929,7 @@ pub fn handle_skills_slash_command_json(args: Option<&str>, cwd: &Path) -> std::
                     "message": format!("skill '{}' not found", name),
                     "requested": name,
                     // #761: hint so callers know how to enumerate available skills
-                    "hint": "Run `claw skills list` to see available skills.",
+                    "hint": "Run `suprai skills list` to see available skills.",
                 }));
             }
             let matched_collection = SkillCollection {
@@ -2944,7 +2944,7 @@ pub fn handle_skills_slash_command_json(args: Option<&str>, cwd: &Path) -> std::
         Some("install") => Ok(render_skills_missing_argument_json(
             "install",
             "install_source",
-            "Usage: claw skills install <path>",
+            "Usage: suprai skills install <path>",
         )),
         // #95: support --project flag for project-level install
         Some(args) if args.starts_with("install ") => {
@@ -2958,11 +2958,11 @@ pub fn handle_skills_slash_command_json(args: Option<&str>, cwd: &Path) -> std::
                 return Ok(render_skills_missing_argument_json(
                     "install",
                     "install_source",
-                    "Usage: claw skills install [--project] <path>",
+                    "Usage: suprai skills install [--project] <path>",
                 ));
             }
             let result = if project_flag {
-                let project_root = cwd.join(".claw").join("skills");
+                let project_root = cwd.join(".suprai").join("skills");
                 install_skill_into(target, cwd, &project_root)
             } else {
                 install_skill(target, cwd)
@@ -2975,7 +2975,7 @@ pub fn handle_skills_slash_command_json(args: Option<&str>, cwd: &Path) -> std::
         Some("uninstall" | "remove" | "delete") => Ok(render_skills_missing_argument_json(
             "uninstall",
             "skill_name",
-            "Usage: claw skills uninstall <name>",
+            "Usage: suprai skills uninstall <name>",
         )),
         Some(args)
             if args.starts_with("uninstall ")
@@ -2988,7 +2988,7 @@ pub fn handle_skills_slash_command_json(args: Option<&str>, cwd: &Path) -> std::
                 return Ok(render_skills_missing_argument_json(
                     "uninstall",
                     "skill_name",
-                    "Usage: claw skills uninstall <name>",
+                    "Usage: suprai skills uninstall <name>",
                 ));
             }
             match uninstall_skill(target)? {
@@ -3178,7 +3178,7 @@ fn render_mcp_report_for(
             Err(err) => {
                 let empty = McpConfigCollection::default();
                 Ok(format!(
-                    "Config load error\n  Status           fail\n  Summary          runtime config failed to load; reporting partial MCP view\n  Details          {err}\n  Hint             `claw doctor` classifies config parse errors; fix the listed field and rerun\n\n{}",
+                    "Config load error\n  Status           fail\n  Summary          runtime config failed to load; reporting partial MCP view\n  Details          {err}\n  Hint             `suprai doctor` classifies config parse errors; fix the listed field and rerun\n\n{}",
                     render_mcp_summary_report(cwd, &empty)
                 ))
             }
@@ -3204,7 +3204,7 @@ fn render_mcp_report_for(
                     runtime_config.mcp(),
                 )),
                 Err(err) => Ok(format!(
-                    "Config load error\n  Status           fail\n  Summary          runtime config failed to load; cannot resolve `{server_name}`\n  Details          {err}\n  Hint             `claw doctor` classifies config parse errors; fix the listed field and rerun"
+                    "Config load error\n  Status           fail\n  Summary          runtime config failed to load; cannot resolve `{server_name}`\n  Details          {err}\n  Hint             `suprai doctor` classifies config parse errors; fix the listed field and rerun"
                 )),
             }
         }
@@ -3212,13 +3212,13 @@ fn render_mcp_report_for(
             // `mcp list <filter>` — list does not accept arguments; treat as unsupported action.
             Ok(render_mcp_unsupported_action_text(
                 args,
-                "list accepts no filter argument; use `claw mcp list`",
+                "list accepts no filter argument; use `suprai mcp list`",
             ))
         }
         Some(args) if matches!(args.split_whitespace().next(), Some("info" | "describe")) => {
             Ok(render_mcp_unsupported_action_text(
                 args,
-                "use `claw mcp show <server>` to inspect a server",
+                "use `suprai mcp show <server>` to inspect a server",
             ))
         }
         Some(args) => Ok(render_mcp_usage(Some(args))),
@@ -3241,7 +3241,7 @@ fn render_mcp_unsupported_action_json(action: &str, hint: &str) -> Value {
         "hint": hint,
         "usage": {
             "slash_command": "/mcp [list|show <server>|help]",
-            "direct_cli": "claw mcp [list|show <server>|help]",
+            "direct_cli": "suprai mcp [list|show <server>|help]",
         },
     })
 }
@@ -3342,13 +3342,13 @@ fn render_mcp_report_json_for(
         Some(args) if args.split_whitespace().next() == Some("list") && args.contains(' ') => {
             Ok(render_mcp_unsupported_action_json(
                 args,
-                "list accepts no filter argument; use `claw mcp list`",
+                "list accepts no filter argument; use `suprai mcp list`",
             ))
         }
         Some(args) if matches!(args.split_whitespace().next(), Some("info" | "describe")) => {
             Ok(render_mcp_unsupported_action_json(
                 args,
-                "use `claw mcp show <server>` to inspect a server",
+                "use `suprai mcp show <server>` to inspect a server",
             ))
         }
         Some(args) => {
@@ -3464,7 +3464,7 @@ fn discover_definition_roots(cwd: &Path, leaf: &str) -> Vec<(DefinitionSource, P
         push_unique_root(
             &mut roots,
             DefinitionSource::ProjectClaw,
-            ancestor.join(".claw").join(leaf),
+            ancestor.join(".suprai").join(leaf),
         );
         push_unique_root(
             &mut roots,
@@ -3478,7 +3478,7 @@ fn discover_definition_roots(cwd: &Path, leaf: &str) -> Vec<(DefinitionSource, P
         );
     }
 
-    if let Ok(claw_config_home) = env::var("CLAW_CONFIG_HOME") {
+    if let Ok(claw_config_home) = env::var("SUPRAI_CONFIG_HOME") {
         push_unique_root(
             &mut roots,
             DefinitionSource::UserClawConfigHome,
@@ -3507,7 +3507,7 @@ fn discover_definition_roots(cwd: &Path, leaf: &str) -> Vec<(DefinitionSource, P
         push_unique_root(
             &mut roots,
             DefinitionSource::UserClaw,
-            home.join(".claw").join(leaf),
+            home.join(".suprai").join(leaf),
         );
         push_unique_root(
             &mut roots,
@@ -3532,7 +3532,7 @@ fn discover_skill_roots(cwd: &Path) -> Vec<SkillRoot> {
         push_unique_skill_root(
             &mut roots,
             DefinitionSource::ProjectClaw,
-            ancestor.join(".claw").join("skills"),
+            ancestor.join(".suprai").join("skills"),
             SkillOrigin::SkillsDir,
         );
         push_unique_skill_root(
@@ -3562,7 +3562,7 @@ fn discover_skill_roots(cwd: &Path) -> Vec<SkillRoot> {
         push_unique_skill_root(
             &mut roots,
             DefinitionSource::ProjectClaw,
-            ancestor.join(".claw").join("commands"),
+            ancestor.join(".suprai").join("commands"),
             SkillOrigin::LegacyCommandsDir,
         );
         push_unique_skill_root(
@@ -3579,7 +3579,7 @@ fn discover_skill_roots(cwd: &Path) -> Vec<SkillRoot> {
         );
     }
 
-    if let Ok(claw_config_home) = env::var("CLAW_CONFIG_HOME") {
+    if let Ok(claw_config_home) = env::var("SUPRAI_CONFIG_HOME") {
         let claw_config_home = PathBuf::from(claw_config_home);
         push_unique_skill_root(
             &mut roots,
@@ -3616,7 +3616,7 @@ fn discover_skill_roots(cwd: &Path) -> Vec<SkillRoot> {
         push_unique_skill_root(
             &mut roots,
             DefinitionSource::UserClaw,
-            home.join(".claw").join("skills"),
+            home.join(".suprai").join("skills"),
             SkillOrigin::SkillsDir,
         );
         push_unique_skill_root(
@@ -3628,7 +3628,7 @@ fn discover_skill_roots(cwd: &Path) -> Vec<SkillRoot> {
         push_unique_skill_root(
             &mut roots,
             DefinitionSource::UserClaw,
-            home.join(".claw").join("commands"),
+            home.join(".suprai").join("commands"),
             SkillOrigin::LegacyCommandsDir,
         );
         push_unique_skill_root(
@@ -3813,7 +3813,7 @@ fn create_agent(name: &str, cwd: &Path) -> std::io::Result<CreatedAgent> {
             "invalid_agent_name: agent name must contain at least one alphanumeric character",
         ));
     };
-    let root = cwd.join(".claw").join("agents");
+    let root = cwd.join(".suprai").join("agents");
     let path = root.join(format!("{name}.toml"));
     if path.exists() {
         return Err(std::io::Error::new(
@@ -3837,18 +3837,18 @@ fn create_agent(name: &str, cwd: &Path) -> std::io::Result<CreatedAgent> {
 }
 
 fn default_skill_install_root() -> std::io::Result<PathBuf> {
-    if let Ok(claw_config_home) = env::var("CLAW_CONFIG_HOME") {
+    if let Ok(claw_config_home) = env::var("SUPRAI_CONFIG_HOME") {
         return Ok(PathBuf::from(claw_config_home).join("skills"));
     }
     if let Ok(codex_home) = env::var("CODEX_HOME") {
         return Ok(PathBuf::from(codex_home).join("skills"));
     }
     if let Some(home) = env::var_os("HOME") {
-        return Ok(PathBuf::from(home).join(".claw").join("skills"));
+        return Ok(PathBuf::from(home).join(".suprai").join("skills"));
     }
     Err(std::io::Error::new(
         std::io::ErrorKind::NotFound,
-        "unable to resolve a skills install root; set CLAW_CONFIG_HOME or HOME",
+        "unable to resolve a skills install root; set SUPRAI_CONFIG_HOME or HOME",
     ))
 }
 
@@ -4417,7 +4417,7 @@ fn render_agents_missing_argument_json(action: &str, argument: &str) -> Value {
         "status": "error",
         "error_kind": "missing_argument",
         "argument": argument,
-        "hint": "Usage: claw agents create <name>",
+        "hint": "Usage: suprai agents create <name>",
     })
 }
 
@@ -4459,7 +4459,7 @@ fn render_agent_create_error_json(name: &str, error: &std::io::Error) -> Value {
         "error_kind": error_kind,
         "name": name,
         "message": message,
-        "hint": "Use `claw agents create <name>` with a simple alphanumeric, dash, underscore, or dot name.",
+        "hint": "Use `suprai agents create <name>` with a simple alphanumeric, dash, underscore, or dot name.",
     })
 }
 
@@ -4660,7 +4660,7 @@ fn render_skill_uninstall_missing_json(
         "skills_dir": registry_root.display().to_string(),
         "available_names": available_names,
         "message": format!("skill '{requested}' not found"),
-        "hint": "Run `claw skills list` to see available skills.",
+        "hint": "Run `suprai skills list` to see available skills.",
     })
 }
 
@@ -4866,7 +4866,7 @@ fn render_mcp_server_report_json(
             "server_name": server_name,
             "message": format!("server `{server_name}` is not configured"),
             // #761: hint so callers know how to enumerate configured MCP servers
-            "hint": "Run `claw mcp list` to see configured servers.",
+            "hint": "Run `suprai mcp list` to see configured servers.",
             "total_configured": mcp.total_configured(),
             "valid_count": mcp.valid_count(),
             "invalid_count": mcp.invalid_count(),
@@ -4893,10 +4893,10 @@ fn render_agents_usage(unexpected: Option<&str>) -> String {
     let mut lines = vec![
         "Agents".to_string(),
         "  Usage            /agents [list|show <name>|create <name>|help]".to_string(),
-        "  Direct CLI       claw agents [list|show <name>|create <name>|help]".to_string(),
-        "  Format           TOML files (.toml); create scaffolds .claw/agents/<name>.toml"
+        "  Direct CLI       suprai agents [list|show <name>|create <name>|help]".to_string(),
+        "  Format           TOML files (.toml); create scaffolds .suprai/agents/<name>.toml"
             .to_string(),
-        "  Sources          .claw/agents, ~/.claw/agents, $CLAW_CONFIG_HOME/agents".to_string(),
+        "  Sources          .suprai/agents, ~/.suprai/agents, $SUPRAI_CONFIG_HOME/agents".to_string(),
     ];
     if let Some(args) = unexpected {
         lines.push(format!("  Unexpected       {args}"));
@@ -4912,10 +4912,10 @@ fn render_agents_usage_json(unexpected: Option<&str>) -> Value {
         "status": if unexpected.is_some() { "error" } else { "ok" },
         "usage": {
             "slash_command": "/agents [list|show <name>|create <name>|help]",
-            "direct_cli": "claw agents [list|show <name>|create <name>|help]",
+            "direct_cli": "suprai agents [list|show <name>|create <name>|help]",
             "format": "toml",
-            "create": "claw agents create <name>",
-            "sources": [".claw/agents", "~/.claw/agents", "~/.codex/agents", "$CLAW_CONFIG_HOME/agents"],
+            "create": "suprai agents create <name>",
+            "sources": [".suprai/agents", "~/.suprai/agents", "~/.codex/agents", "$SUPRAI_CONFIG_HOME/agents"],
         },
         "unexpected": unexpected,
     })
@@ -4926,11 +4926,11 @@ fn render_skills_usage(unexpected: Option<&str>) -> String {
         "Skills".to_string(),
         "  Usage            /skills [list|show <name>|install [--project] <path>|uninstall <name>|help|<skill> [args]]".to_string(),
         "  Alias            /skill".to_string(),
-        "  Direct CLI       claw skills [list|show <name>|install [--project] <path>|uninstall <name>|help|<skill> [args]]".to_string(),
+        "  Direct CLI       suprai skills [list|show <name>|install [--project] <path>|uninstall <name>|help|<skill> [args]]".to_string(),
         "  Lifecycle        install <path>, uninstall <name>".to_string(),
         "  Invoke           /skills help overview -> $help overview".to_string(),
-        "  Install root     $CLAW_CONFIG_HOME/skills or ~/.claw/skills (use --project for .claw/skills)".to_string(),
-        "  Sources          .claw/skills, .omc/skills, .agents/skills, .codex/skills, .claude/skills, ~/.claw/skills, ~/.omc/skills, ~/.claude/skills/omc-learned, ~/.codex/skills, ~/.claude/skills, legacy /commands".to_string(),
+        "  Install root     $SUPRAI_CONFIG_HOME/skills or ~/.suprai/skills (use --project for .suprai/skills)".to_string(),
+        "  Sources          .suprai/skills, .omc/skills, .agents/skills, .codex/skills, .claude/skills, ~/.suprai/skills, ~/.omc/skills, ~/.claude/skills/omc-learned, ~/.codex/skills, ~/.claude/skills, legacy /commands".to_string(),
     ];
     if let Some(args) = unexpected {
         lines.push(format!("  Unexpected       {args}"));
@@ -4947,17 +4947,17 @@ fn render_skills_usage_json(unexpected: Option<&str>) -> Value {
         "usage": {
             "slash_command": "/skills [list|show <name>|install <path>|uninstall <name>|help|<skill> [args]]",
             "aliases": ["/skill"],
-            "direct_cli": "claw skills [list|show <name>|install <path>|uninstall <name>|help|<skill> [args]]",
+            "direct_cli": "suprai skills [list|show <name>|install <path>|uninstall <name>|help|<skill> [args]]",
             "lifecycle": ["install <path>", "uninstall <name>"],
             "invoke": "/skills help overview -> $help overview",
-            "install_root": "$CLAW_CONFIG_HOME/skills or ~/.claw/skills",
+            "install_root": "$SUPRAI_CONFIG_HOME/skills or ~/.suprai/skills",
             "sources": [
-                ".claw/skills",
+                ".suprai/skills",
                 ".omc/skills",
                 ".agents/skills",
                 ".codex/skills",
                 ".claude/skills",
-                "~/.claw/skills",
+                "~/.suprai/skills",
                 "~/.omc/skills",
                 "~/.claude/skills/omc-learned",
                 "~/.codex/skills",
@@ -4974,8 +4974,8 @@ fn render_mcp_usage(unexpected: Option<&str>) -> String {
     let mut lines = vec![
         "MCP".to_string(),
         "  Usage            /mcp [list|show <server>|help]".to_string(),
-        "  Direct CLI       claw mcp [list|show <server>|help]".to_string(),
-        "  Sources          .claw/settings.json, .claw/settings.local.json".to_string(),
+        "  Direct CLI       suprai mcp [list|show <server>|help]".to_string(),
+        "  Sources          .suprai/settings.json, .suprai/settings.local.json".to_string(),
     ];
     if let Some(args) = unexpected {
         lines.push(format!("  Unexpected       {args}"));
@@ -4985,7 +4985,7 @@ fn render_mcp_usage(unexpected: Option<&str>) -> String {
 
 fn render_mcp_missing_argument_text(action: &str) -> String {
     let hint = match action {
-        "show" => "use `claw mcp show <server>` to inspect a server",
+        "show" => "use `suprai mcp show <server>` to inspect a server",
         _ => "provide the required argument for this MCP action",
     };
     format!(
@@ -4997,11 +4997,11 @@ fn render_mcp_missing_argument_json(action: &str) -> Value {
     let (message, hint) = match action {
         "show" => (
             "mcp show requires a server name",
-            "Usage: claw mcp show <server>",
+            "Usage: suprai mcp show <server>",
         ),
         _ => (
             "mcp action requires an argument",
-            "Usage: claw mcp [list|show <server>|help]",
+            "Usage: suprai mcp [list|show <server>|help]",
         ),
     };
     json!({
@@ -5014,8 +5014,8 @@ fn render_mcp_missing_argument_json(action: &str) -> Value {
         "hint": hint,
         "usage": {
             "slash_command": "/mcp [list|show <server>|help]",
-            "direct_cli": "claw mcp [list|show <server>|help]",
-            "sources": [".claw/settings.json", ".claw/settings.local.json"],
+            "direct_cli": "suprai mcp [list|show <server>|help]",
+            "sources": [".suprai/settings.json", ".suprai/settings.local.json"],
         },
         "unexpected": Value::Null,
     })
@@ -5044,8 +5044,8 @@ fn render_mcp_usage_json(unexpected: Option<&str>) -> Value {
         "hint": hint,
         "usage": {
             "slash_command": "/mcp [list|show <server>|help]",
-            "direct_cli": "claw mcp [list|show <server>|help]",
-            "sources": [".claw.json", ".claw/settings.json", ".claw/settings.local.json"],
+            "direct_cli": "suprai mcp [list|show <server>|help]",
+            "sources": [".suprai.json", ".suprai/settings.json", ".suprai/settings.local.json"],
         },
         "unexpected": unexpected,
     })
@@ -5131,12 +5131,12 @@ fn definition_source_id(source: DefinitionSource) -> &'static str {
     match source {
         DefinitionSource::ProjectClaw
         | DefinitionSource::ProjectCodex
-        | DefinitionSource::ProjectClaude => "project_claw",
+        | DefinitionSource::ProjectClaude => "project_suprai",
         DefinitionSource::UserClawConfigHome | DefinitionSource::UserCodexHome => {
-            "user_claw_config_home"
+            "user_suprai_config_home"
         }
         DefinitionSource::UserClaw | DefinitionSource::UserCodex | DefinitionSource::UserClaude => {
-            "user_claw"
+            "user_suprai"
         }
     }
 }
@@ -5858,7 +5858,7 @@ mod tests {
     #[test]
     fn skills_show_and_list_filter_do_not_invoke_model() {
         // `show`, `info`, `list <filter>` must route to Local, not Invoke.
-        // Regression for: `claw skills show plan` unexpectedly spawned a model session.
+        // Regression for: `suprai skills show plan` unexpectedly spawned a model session.
         for token in &["show", "info", "describe"] {
             assert_eq!(
                 classify_skills_slash_command(Some(token)),
@@ -6073,7 +6073,7 @@ mod tests {
 
         // then
         assert!(help.contains("/plugin"));
-        assert!(help.contains("Summary          Manage Claw Code plugins"));
+        assert!(help.contains("Summary          Manage SuprAI plugins"));
         assert!(help.contains("Aliases          /plugins, /marketplace"));
         assert!(help.contains("Category         Tools"));
     }
@@ -6367,11 +6367,11 @@ mod tests {
         fs::create_dir_all(&codex_home).expect("codex home");
         fs::create_dir_all(&claude_config).expect("claude config");
         let original_home = std::env::var_os("HOME");
-        let original_claw_config_home = std::env::var_os("CLAW_CONFIG_HOME");
+        let original_claw_config_home = std::env::var_os("SUPRAI_CONFIG_HOME");
         let original_codex_home = std::env::var_os("CODEX_HOME");
         let original_claude_config_dir = std::env::var_os("CLAUDE_CONFIG_DIR");
         std::env::set_var("HOME", &isolated_home);
-        std::env::set_var("CLAW_CONFIG_HOME", &config_home);
+        std::env::set_var("SUPRAI_CONFIG_HOME", &config_home);
         std::env::set_var("CODEX_HOME", &codex_home);
         std::env::set_var("CLAUDE_CONFIG_DIR", &claude_config);
 
@@ -6422,7 +6422,7 @@ mod tests {
         assert_eq!(report["agents"][1]["name"], "verifier");
         assert_eq!(report["agents"][2]["name"], "planner");
         assert_eq!(report["agents"][2]["active"], false);
-        assert_eq!(report["agents"][2]["shadowed_by"]["id"], "project_claw");
+        assert_eq!(report["agents"][2]["shadowed_by"]["id"], "project_suprai");
 
         let help = handle_agents_slash_command_json(Some("help"), &workspace).expect("agents help");
         assert_eq!(help["kind"], "agents");
@@ -6430,7 +6430,7 @@ mod tests {
         assert_eq!(help["status"], "ok");
         assert_eq!(
             help["usage"]["direct_cli"],
-            "claw agents [list|show <name>|create <name>|help]"
+            "suprai agents [list|show <name>|create <name>|help]"
         );
 
         // `show <name>` is now valid. Known agent returns ok with matching entry.
@@ -6454,7 +6454,7 @@ mod tests {
         let _ = fs::remove_dir_all(workspace);
         let _ = fs::remove_dir_all(user_home);
         restore_env_var("HOME", original_home);
-        restore_env_var("CLAW_CONFIG_HOME", original_claw_config_home);
+        restore_env_var("SUPRAI_CONFIG_HOME", original_claw_config_home);
         restore_env_var("CODEX_HOME", original_codex_home);
         restore_env_var("CLAUDE_CONFIG_DIR", original_claude_config_dir);
         let _ = fs::remove_dir_all(isolated_home);
@@ -6512,8 +6512,8 @@ mod tests {
     #[test]
     fn resolves_project_skills_and_legacy_commands_from_shared_registry() {
         let workspace = temp_dir("resolve-project-skills");
-        let project_skills = workspace.join(".claw").join("skills");
-        let legacy_commands = workspace.join(".claw").join("commands");
+        let project_skills = workspace.join(".suprai").join("skills");
+        let legacy_commands = workspace.join(".suprai").join("commands");
 
         write_skill(&project_skills, "plan", "Project planning guidance");
         write_legacy_command(&legacy_commands, "handoff", "Legacy handoff guidance");
@@ -6571,21 +6571,21 @@ mod tests {
         assert_eq!(report["summary"]["active"], 3);
         assert_eq!(report["summary"]["shadowed"], 1);
         assert_eq!(report["skills"][0]["name"], "plan");
-        assert_eq!(report["skills"][0]["source"]["id"], "project_claw");
+        assert_eq!(report["skills"][0]["source"]["id"], "project_suprai");
         assert_eq!(report["skills"][0]["source"]["label"], "Project roots");
         assert_eq!(
             report["skills"][0]["source"]["detail_label"],
             serde_json::Value::Null
         );
         assert_eq!(report["skills"][1]["name"], "deploy");
-        assert_eq!(report["skills"][1]["source"]["id"], "project_claw");
+        assert_eq!(report["skills"][1]["source"]["id"], "project_suprai");
         assert_eq!(report["skills"][1]["source"]["label"], "Project roots");
         assert_eq!(
             report["skills"][1]["source"]["detail_label"],
             "legacy /commands"
         );
         assert_eq!(report["skills"][1]["origin"]["id"], "legacy_commands_dir");
-        assert_eq!(report["skills"][3]["shadowed_by"]["id"], "project_claw");
+        assert_eq!(report["skills"][3]["shadowed_by"]["id"], "project_suprai");
 
         let help = handle_skills_slash_command_json(Some("help"), &workspace).expect("skills help");
         assert_eq!(help["kind"], "skills");
@@ -6594,7 +6594,7 @@ mod tests {
         assert_eq!(help["usage"]["aliases"][0], "/skill");
         assert_eq!(
             help["usage"]["direct_cli"],
-            "claw skills [list|show <name>|install <path>|uninstall <name>|help|<skill> [args]]"
+            "suprai skills [list|show <name>|install <path>|uninstall <name>|help|<skill> [args]]"
         );
 
         let _ = fs::remove_dir_all(workspace);
@@ -6611,12 +6611,12 @@ mod tests {
             agents_help.contains("Usage            /agents [list|show <name>|create <name>|help]")
         );
         assert!(agents_help
-            .contains("Direct CLI       claw agents [list|show <name>|create <name>|help]"));
+            .contains("Direct CLI       suprai agents [list|show <name>|create <name>|help]"));
         assert!(agents_help.contains(
-            "Format           TOML files (.toml); create scaffolds .claw/agents/<name>.toml"
+            "Format           TOML files (.toml); create scaffolds .suprai/agents/<name>.toml"
         ));
         assert!(agents_help
-            .contains("Sources          .claw/agents, ~/.claw/agents, $CLAW_CONFIG_HOME/agents"));
+            .contains("Sources          .suprai/agents, ~/.suprai/agents, $SUPRAI_CONFIG_HOME/agents"));
 
         // `show <name>` is now valid. For an agent that doesn't exist it returns Err(NotFound).
         let agents_show_missing =
@@ -6646,7 +6646,7 @@ mod tests {
         assert!(skills_help.contains("Lifecycle        install <path>, uninstall <name>"));
         assert!(skills_help.contains("Invoke           /skills help overview -> $help overview"));
         // #95: install root now mentions --project flag
-        assert!(skills_help.contains("Install root     $CLAW_CONFIG_HOME/skills or ~/.claw/skills (use --project for .claw/skills)"));
+        assert!(skills_help.contains("Install root     $SUPRAI_CONFIG_HOME/skills or ~/.suprai/skills (use --project for .suprai/skills)"));
         assert!(skills_help.contains(".omc/skills"));
         assert!(skills_help.contains(".agents/skills"));
         assert!(skills_help.contains("~/.claude/skills/omc-learned"));
@@ -6759,7 +6759,7 @@ mod tests {
 
         let help = super::handle_mcp_slash_command(Some("help"), &cwd).expect("mcp help");
         assert!(help.contains("Usage            /mcp [list|show <server>|help]"));
-        assert!(help.contains("Direct CLI       claw mcp [list|show <server>|help]"));
+        assert!(help.contains("Direct CLI       suprai mcp [list|show <server>|help]"));
 
         let unexpected =
             super::handle_mcp_slash_command(Some("show alpha beta"), &cwd).expect("mcp usage");
@@ -6782,10 +6782,10 @@ mod tests {
     fn renders_mcp_reports_from_loaded_config() {
         let workspace = temp_dir("mcp-config-workspace");
         let config_home = temp_dir("mcp-config-home");
-        fs::create_dir_all(workspace.join(".claw")).expect("workspace config dir");
+        fs::create_dir_all(workspace.join(".suprai")).expect("workspace config dir");
         fs::create_dir_all(&config_home).expect("config home");
         fs::write(
-            workspace.join(".claw").join("settings.json"),
+            workspace.join(".suprai").join("settings.json"),
             r#"{
               "mcpServers": {
                 "alpha": {
@@ -6810,7 +6810,7 @@ mod tests {
         )
         .expect("write settings");
         fs::write(
-            workspace.join(".claw").join("settings.local.json"),
+            workspace.join(".suprai").join("settings.local.json"),
             r#"{
               "mcpServers": {
                 "remote": {
@@ -6861,10 +6861,10 @@ mod tests {
     fn renders_mcp_reports_as_json() {
         let workspace = temp_dir("mcp-json-workspace");
         let config_home = temp_dir("mcp-json-home");
-        fs::create_dir_all(workspace.join(".claw")).expect("workspace config dir");
+        fs::create_dir_all(workspace.join(".suprai")).expect("workspace config dir");
         fs::create_dir_all(&config_home).expect("config home");
         fs::write(
-            workspace.join(".claw").join("settings.json"),
+            workspace.join(".suprai").join("settings.json"),
             r#"{
               "mcpServers": {
                 "alpha": {
@@ -6889,7 +6889,7 @@ mod tests {
         )
         .expect("write settings");
         fs::write(
-            workspace.join(".claw").join("settings.local.json"),
+            workspace.join(".suprai").join("settings.local.json"),
             r#"{
               "mcpServers": {
                 "remote": {
@@ -6936,7 +6936,7 @@ mod tests {
         let help =
             render_mcp_report_json_for(&loader, &workspace, Some("help")).expect("mcp help json");
         assert_eq!(help["action"], "help");
-        assert_eq!(help["usage"]["sources"][0], ".claw.json");
+        assert_eq!(help["usage"]["sources"][0], ".suprai.json");
 
         let _ = fs::remove_dir_all(workspace);
         let _ = fs::remove_dir_all(config_home);
@@ -6949,11 +6949,11 @@ mod tests {
         let _guard = env_guard();
         let workspace = temp_dir("mcp-degrades-144");
         let config_home = temp_dir("mcp-degrades-144-cfg");
-        fs::create_dir_all(workspace.join(".claw")).expect("create workspace .claw dir");
+        fs::create_dir_all(workspace.join(".suprai")).expect("create workspace .claw dir");
         fs::create_dir_all(&config_home).expect("create config home");
         // One valid server + one malformed entry missing `command`.
         fs::write(
-            workspace.join(".claw.json"),
+            workspace.join(".suprai.json"),
             r#"{
   "mcpServers": {
     "everything": {"command": "npx", "args": ["-y", "@modelcontextprotocol/server-everything"]},
@@ -6962,7 +6962,7 @@ mod tests {
 }
 "#,
         )
-        .expect("write malformed .claw.json");
+        .expect("write malformed .suprai.json");
 
         let loader = ConfigLoader::new(&workspace, &config_home);
         // list action: must return Ok (not Err) with degraded envelope.

@@ -9,7 +9,7 @@ unless a maintainer explicitly marks them as supported.
 ## Reporting a vulnerability
 
 Please do **not** open a public issue for a suspected vulnerability. Use GitHub
-private vulnerability reporting for `ultraworkers/claw-code` when available, or
+private vulnerability reporting for `ultraworkers/SuprAI` when available, or
 contact a maintainer through the repository's published support channel with a
 minimal, non-destructive reproduction.
 
@@ -39,7 +39,7 @@ Out of scope:
 - social engineering;
 - denial-of-service without a practical security impact;
 - issues that require already-compromised local developer credentials;
-- reports against third-party providers or upstream tools without a Claw Code
+- reports against third-party providers or upstream tools without a SuprAI
   integration issue.
 
 ## Handling expectations

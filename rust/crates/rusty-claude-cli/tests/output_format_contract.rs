@@ -48,7 +48,7 @@ fn export_help_emits_bounded_json_when_requested_384() {
     assert_eq!(parsed["command"], "export");
     assert_eq!(
         parsed["usage"],
-        "claw export [--session <id|latest>] [--output <path>] [--output-format <format>]"
+        "suprai export [--session <id|latest>] [--output <path>] [--output-format <format>]"
     );
     assert_eq!(parsed["defaults"]["session"], "latest");
     assert!(parsed["options"].as_array().expect("options").len() >= 4);
@@ -69,7 +69,7 @@ fn export_help_preserves_plaintext_in_text_mode_384() {
     );
     let stdout = String::from_utf8(output.stdout).expect("stdout utf8");
     assert!(stdout.starts_with("Export\n"));
-    assert!(stdout.contains("Usage            claw export"));
+    assert!(stdout.contains("Usage            suprai export"));
     serde_json::from_str::<Value>(&stdout).expect_err("text help should remain plaintext");
 }
 
@@ -96,7 +96,7 @@ fn assert_doctor_help_json_contract(parsed: &Value) {
     assert_eq!(parsed["status"], "ok");
     assert_eq!(parsed["topic"], "doctor");
     assert_eq!(parsed["command"], "doctor");
-    assert_eq!(parsed["usage"], "claw doctor [--output-format <format>]");
+    assert_eq!(parsed["usage"], "suprai doctor [--output-format <format>]");
     assert_eq!(parsed["local_only"], true);
     assert_eq!(parsed["requires_credentials"], false);
     assert_eq!(parsed["requires_provider_request"], false);
@@ -129,7 +129,7 @@ fn doctor_help_text_stays_plaintext_and_local_702() {
     );
     let stdout = String::from_utf8(output.stdout).expect("stdout utf8");
     assert!(stdout.starts_with("Doctor\n"));
-    assert!(stdout.contains("Usage            claw doctor"));
+    assert!(stdout.contains("Usage            suprai doctor"));
     assert!(stdout.contains("no provider request or session resume required"));
     serde_json::from_str::<Value>(&stdout).expect_err("text help should remain plaintext");
 }
@@ -139,14 +139,14 @@ fn resume_session_compact_help_short_circuits_before_config_or_auth_427() {
     let root = unique_temp_dir("session-help-local-427");
     let config_home = root.join("config-home");
     let home = root.join("home");
-    fs::create_dir_all(root.join(".claw")).expect("project config dir should exist");
+    fs::create_dir_all(root.join(".suprai")).expect("project config dir should exist");
     fs::create_dir_all(&config_home).expect("config home should exist");
     fs::create_dir_all(&home).expect("home should exist");
-    fs::write(root.join(".claw").join("settings.json"), "{").expect("broken config should write");
+    fs::write(root.join(".suprai").join("settings.json"), "{").expect("broken config should write");
 
     let envs = [
         (
-            "CLAW_CONFIG_HOME",
+            "SUPRAI_CONFIG_HOME",
             config_home.to_str().expect("utf8 config home"),
         ),
         ("HOME", home.to_str().expect("utf8 home")),
@@ -215,7 +215,7 @@ fn resume_missing_session_json_reports_local_store_before_auth_427() {
 
     let envs = [
         (
-            "CLAW_CONFIG_HOME",
+            "SUPRAI_CONFIG_HOME",
             config_home.to_str().expect("utf8 config home"),
         ),
         ("HOME", home.to_str().expect("utf8 home")),
@@ -256,7 +256,7 @@ fn resume_missing_session_json_reports_local_store_before_auth_427() {
     assert!(
         parsed["sessions_dir"]
             .as_str()
-            .is_some_and(|path| path.contains(".claw") && path.contains("sessions")),
+            .is_some_and(|path| path.contains(".suprai") && path.contains("sessions")),
         "missing-session JSON should expose the searched sessions_dir: {parsed}"
     );
 }
@@ -281,7 +281,7 @@ fn version_emits_json_when_requested() {
     assert!(
         parsed["human_readable"]
             .as_str()
-            .is_some_and(|text| text.contains("Claw Code")),
+            .is_some_and(|text| text.contains("SuprAI")),
         "version JSON should keep text output only in human_readable: {parsed}"
     );
     let git_sha = parsed["git_sha"]
@@ -366,7 +366,7 @@ fn version_status_doctor_include_binary_provenance_797() {
     let root = git_temp_dir("binary-provenance-797");
     fs::write(root.join("tracked.txt"), "v1").expect("write tracked file");
     let git_commands: &[&[&str]] = &[
-        &["config", "user.email", "test@claw.test"],
+        &["config", "user.email", "test@suprai.test"],
         &["config", "user.name", "Test"],
         &["add", "tracked.txt"],
         &["commit", "-m", "init"],
@@ -521,7 +521,7 @@ fn default_permission_mode_is_workspace_write_and_audited_428() {
     fs::create_dir_all(&home).expect("home should exist");
     let envs = [
         (
-            "CLAW_CONFIG_HOME",
+            "SUPRAI_CONFIG_HOME",
             config_home.to_str().expect("utf8 config home"),
         ),
         ("HOME", home.to_str().expect("utf8 home")),
@@ -769,11 +769,11 @@ fn status_json_accepts_namespaced_model_env_and_surfaces_alias_426() {
 
     let envs = [
         (
-            "CLAW_CONFIG_HOME",
+            "SUPRAI_CONFIG_HOME",
             config_home.to_str().expect("utf8 config home"),
         ),
         ("HOME", home.to_str().expect("utf8 home")),
-        ("CLAW_MODEL", "opus"),
+        ("SUPRAI_MODEL", "opus"),
         ("ANTHROPIC_MODEL", ""),
         ("ANTHROPIC_DEFAULT_MODEL", ""),
     ];
@@ -787,7 +787,7 @@ fn status_json_accepts_namespaced_model_env_and_surfaces_alias_426() {
         parsed["model_alias_resolved_to"],
         "anthropic/claude-opus-4-7"
     );
-    assert_eq!(parsed["model_env_var"], "CLAW_MODEL");
+    assert_eq!(parsed["model_env_var"], "SUPRAI_MODEL");
 }
 
 #[test]
@@ -801,11 +801,11 @@ fn status_json_warns_on_invalid_model_env_426() {
 
     let envs = [
         (
-            "CLAW_CONFIG_HOME",
+            "SUPRAI_CONFIG_HOME",
             config_home.to_str().expect("utf8 config home"),
         ),
         ("HOME", home.to_str().expect("utf8 home")),
-        ("CLAW_MODEL", ""),
+        ("SUPRAI_MODEL", ""),
         ("ANTHROPIC_MODEL", "bogus-model-xyz"),
         ("ANTHROPIC_DEFAULT_MODEL", ""),
     ];
@@ -896,7 +896,7 @@ fn inventory_commands_emit_structured_json_when_requested() {
         &[
             ("HOME", isolated_home.to_str().expect("utf8 home")),
             (
-                "CLAW_CONFIG_HOME",
+                "SUPRAI_CONFIG_HOME",
                 isolated_config.to_str().expect("utf8 config home"),
             ),
             (
@@ -918,7 +918,7 @@ fn inventory_commands_emit_structured_json_when_requested() {
     let agents_show_env = [
         ("HOME", isolated_home.to_str().expect("utf8 home")),
         (
-            "CLAW_CONFIG_HOME",
+            "SUPRAI_CONFIG_HOME",
             isolated_config.to_str().expect("utf8 config home"),
         ),
         (
@@ -1095,7 +1095,7 @@ fn plugins_json_surfaces_lifecycle_contract_when_plugin_is_installed() {
         &[
             ("HOME", home.to_str().expect("home path should be utf8")),
             (
-                "CLAW_CONFIG_HOME",
+                "SUPRAI_CONFIG_HOME",
                 config_home.to_str().expect("config path should be utf8"),
             ),
         ],
@@ -1161,7 +1161,7 @@ fn agents_command_emits_structured_agent_entries_when_requested() {
         &[
             ("HOME", home.to_str().expect("utf8 home")),
             (
-                "CLAW_CONFIG_HOME",
+                "SUPRAI_CONFIG_HOME",
                 isolated_config.to_str().expect("utf8 config home"),
             ),
             (
@@ -1177,14 +1177,14 @@ fn agents_command_emits_structured_agent_entries_when_requested() {
     assert_eq!(parsed["summary"]["active"], 2);
     assert_eq!(parsed["summary"]["shadowed"], 1);
     assert_eq!(parsed["agents"][0]["name"], "planner");
-    assert_eq!(parsed["agents"][0]["source"]["id"], "project_claw");
+    assert_eq!(parsed["agents"][0]["source"]["id"], "project_suprai");
     assert_eq!(parsed["agents"][0]["source"]["label"], "Project roots");
     assert_eq!(parsed["agents"][0]["source"]["detail_label"], Value::Null);
     assert_eq!(parsed["agents"][0]["active"], true);
     assert_eq!(parsed["agents"][1]["name"], "verifier");
     assert_eq!(parsed["agents"][2]["name"], "planner");
     assert_eq!(parsed["agents"][2]["active"], false);
-    assert_eq!(parsed["agents"][2]["shadowed_by"]["id"], "project_claw");
+    assert_eq!(parsed["agents"][2]["shadowed_by"]["id"], "project_suprai");
 }
 
 #[test]
@@ -1213,7 +1213,7 @@ fn agents_and_skills_inventory_share_source_schema_702() {
     let envs = [
         ("HOME", home.to_str().expect("utf8 home")),
         (
-            "CLAW_CONFIG_HOME",
+            "SUPRAI_CONFIG_HOME",
             isolated_config.to_str().expect("utf8 config home"),
         ),
         (
@@ -1242,10 +1242,10 @@ fn agents_and_skills_inventory_share_source_schema_702() {
             "inventory source must expose detail_label for a stable cross-resource path: {source}"
         );
     }
-    assert_eq!(agent_source["id"], "project_claw");
+    assert_eq!(agent_source["id"], "project_suprai");
     assert_eq!(agent_source["label"], "Project roots");
     assert_eq!(agent_source["detail_label"], Value::Null);
-    assert_eq!(skill_source["id"], "project_claw");
+    assert_eq!(skill_source["id"], "project_suprai");
     assert_eq!(skill_source["label"], "Project roots");
     assert_eq!(skill_source["detail_label"], Value::Null);
 
@@ -1255,7 +1255,7 @@ fn agents_and_skills_inventory_share_source_schema_702() {
         .iter()
         .find(|skill| skill["name"] == "deploy")
         .expect("legacy command skill should be listed");
-    assert_eq!(legacy_skill["source"]["id"], "project_claw");
+    assert_eq!(legacy_skill["source"]["id"], "project_suprai");
     assert_eq!(legacy_skill["source"]["label"], "Project roots");
     assert_eq!(legacy_skill["source"]["detail_label"], "legacy /commands");
     assert_eq!(
@@ -1298,11 +1298,11 @@ fn memory_files_load_claude_claw_agents_and_surface_json_438() {
     fs::create_dir_all(&config_home).expect("config home should exist");
     fs::create_dir_all(&home).expect("home should exist");
     fs::write(root.join("CLAUDE.md"), "MARKER-FROM-CLAUDE-MD\n").expect("write CLAUDE.md");
-    fs::write(root.join("CLAW.md"), "MARKER-FROM-CLAW-MD\n").expect("write CLAW.md");
+    fs::write(root.join("SUPRAI.md"), "MARKER-FROM-CLAW-MD\n").expect("write SUPRAI.md");
     fs::write(root.join("AGENTS.md"), "MARKER-FROM-AGENTS-MD\n").expect("write AGENTS.md");
     let envs = [
         (
-            "CLAW_CONFIG_HOME",
+            "SUPRAI_CONFIG_HOME",
             config_home.to_str().expect("utf8 config home"),
         ),
         ("HOME", home.to_str().expect("utf8 home")),
@@ -1317,7 +1317,7 @@ fn memory_files_load_claude_claw_agents_and_surface_json_438() {
         .iter()
         .map(|file| file["source"].as_str().expect("memory source"))
         .collect::<Vec<_>>();
-    assert_eq!(sources, vec!["claude_md", "claw_md", "agents_md"]);
+    assert_eq!(sources, vec!["claude_md", "suprai_md", "agents_md"]);
     assert!(memory_files
         .iter()
         .all(|file| file["path"].as_str().is_some()));
@@ -1344,7 +1344,7 @@ fn memory_files_load_claude_claw_agents_and_surface_json_438() {
     assert!(message.contains("MARKER-FROM-CLAW-MD"));
     assert!(message.contains("MARKER-FROM-AGENTS-MD"));
     assert_eq!(prompt["memory_file_count"], 3);
-    assert_eq!(prompt["memory_files"][1]["source"], "claw_md");
+    assert_eq!(prompt["memory_files"][1]["source"], "suprai_md");
 
     let doctor = assert_json_command_with_env(&root, &["--output-format", "json", "doctor"], &envs);
     let memory = doctor["checks"]
@@ -1387,7 +1387,7 @@ fn memory_discovery_stops_at_git_root_and_reports_origins_439() {
     .expect("write deep");
     let envs = [
         (
-            "CLAW_CONFIG_HOME",
+            "SUPRAI_CONFIG_HOME",
             config_home.to_str().expect("utf8 config home"),
         ),
         ("HOME", home.to_str().expect("utf8 home")),
@@ -1516,11 +1516,11 @@ fn doctor_and_resume_status_emit_json_when_requested() {
         .expect("install source check");
     assert_eq!(
         install_source["official_repo"],
-        "https://github.com/ultraworkers/claw-code"
+        "https://github.com/ultraworkers/SuprAI"
     );
     assert_eq!(
         install_source["deprecated_install"],
-        "cargo install claw-code"
+        "cargo install SuprAI"
     );
 
     let workspace = checks
@@ -1621,7 +1621,7 @@ fn resumed_inventory_commands_emit_structured_json_when_requested() {
         ],
         &[
             (
-                "CLAW_CONFIG_HOME",
+                "SUPRAI_CONFIG_HOME",
                 config_home.to_str().expect("utf8 config home"),
             ),
             ("HOME", home.to_str().expect("utf8 home")),
@@ -1642,7 +1642,7 @@ fn resumed_inventory_commands_emit_structured_json_when_requested() {
         ],
         &[
             (
-                "CLAW_CONFIG_HOME",
+                "SUPRAI_CONFIG_HOME",
                 config_home.to_str().expect("utf8 config home"),
             ),
             ("HOME", home.to_str().expect("utf8 home")),
@@ -1664,7 +1664,7 @@ fn resumed_inventory_commands_emit_structured_json_when_requested() {
         ],
         &[
             (
-                "CLAW_CONFIG_HOME",
+                "SUPRAI_CONFIG_HOME",
                 config_home.to_str().expect("utf8 config home"),
             ),
             ("HOME", home.to_str().expect("utf8 home")),
@@ -1692,7 +1692,7 @@ fn resumed_inventory_commands_emit_structured_json_when_requested() {
         ],
         &[
             (
-                "CLAW_CONFIG_HOME",
+                "SUPRAI_CONFIG_HOME",
                 config_home.to_str().expect("utf8 config home"),
             ),
             ("HOME", home.to_str().expect("utf8 home")),
@@ -1803,11 +1803,11 @@ fn mcp_json_reports_required_optional_and_redacts_secret_values() {
     let root = unique_temp_dir("mcp-required-optional");
     let config_home = root.join("config-home");
     let home = root.join("home");
-    fs::create_dir_all(root.join(".claw")).expect("workspace config should exist");
+    fs::create_dir_all(root.join(".suprai")).expect("workspace config should exist");
     fs::create_dir_all(&config_home).expect("config home should exist");
     fs::create_dir_all(&home).expect("home should exist");
     fs::write(
-        root.join(".claw").join("settings.json"),
+        root.join(".suprai").join("settings.json"),
         r#"{
           "mcpServers": {
             "required-stdio": {
@@ -1832,7 +1832,7 @@ fn mcp_json_reports_required_optional_and_redacts_secret_values() {
 
     let envs = [
         (
-            "CLAW_CONFIG_HOME",
+            "SUPRAI_CONFIG_HOME",
             config_home.to_str().expect("config home"),
         ),
         ("HOME", home.to_str().expect("home")),
@@ -1899,7 +1899,7 @@ fn mcp_degraded_config_and_failed_usage_are_distinct_json_contracts() {
     fs::create_dir_all(&config_home).expect("config home should exist");
     fs::create_dir_all(&home).expect("home should exist");
     fs::write(
-        workspace.join(".claw.json"),
+        workspace.join(".suprai.json"),
         r#"{
           "mcpServers": {
             "valid-server": {
@@ -1922,7 +1922,7 @@ fn mcp_degraded_config_and_failed_usage_are_distinct_json_contracts() {
     .expect("malformed mcp config should write");
     let envs = [
         (
-            "CLAW_CONFIG_HOME",
+            "SUPRAI_CONFIG_HOME",
             config_home.to_str().expect("config home"),
         ),
         ("HOME", home.to_str().expect("home")),
@@ -2027,7 +2027,7 @@ fn local_json_surfaces_have_non_empty_action_contract_714() {
     let envs = [
         ("HOME", home.to_str().expect("home utf8")),
         (
-            "CLAW_CONFIG_HOME",
+            "SUPRAI_CONFIG_HOME",
             config_home.to_str().expect("config utf8"),
         ),
         ("CODEX_HOME", codex_home.to_str().expect("codex utf8")),
@@ -2120,7 +2120,7 @@ fn inventory_commands_deduplicate_config_deprecation_warnings_per_process() {
 
     let envs = [
         (
-            "CLAW_CONFIG_HOME",
+            "SUPRAI_CONFIG_HOME",
             config_home.to_str().expect("utf8 config home"),
         ),
         ("HOME", home.to_str().expect("utf8 home")),
@@ -2160,7 +2160,7 @@ fn config_json_reports_deprecations_structurally_without_stderr_duplicate_815() 
 
     let envs = [
         (
-            "CLAW_CONFIG_HOME",
+            "SUPRAI_CONFIG_HOME",
             config_home.to_str().expect("utf8 config home"),
         ),
         ("HOME", home.to_str().expect("utf8 home")),
@@ -2220,7 +2220,7 @@ fn status_deduplicates_config_deprecation_warnings_per_invocation_425() {
 
     let envs = [
         (
-            "CLAW_CONFIG_HOME",
+            "SUPRAI_CONFIG_HOME",
             config_home.to_str().expect("utf8 config home"),
         ),
         ("HOME", home.to_str().expect("utf8 home")),
@@ -2247,23 +2247,23 @@ fn config_json_attributes_precedence_and_shadowed_keys_425() {
     let root = unique_temp_dir("config-precedence-425");
     let config_home = root.join("config-home");
     let home = root.join("home");
-    fs::create_dir_all(root.join(".claw")).expect("workspace config should exist");
+    fs::create_dir_all(root.join(".suprai")).expect("workspace config should exist");
     fs::create_dir_all(&config_home).expect("config home should exist");
     fs::create_dir_all(&home).expect("home should exist");
     fs::write(
-        root.join(".claw.json"),
+        root.join(".suprai.json"),
         r#"{"model":"anthropic/claude-sonnet-4-6","env":{"A":"legacy","B":"legacy"}}"#,
     )
     .expect("legacy project config fixture should write");
     fs::write(
-        root.join(".claw").join("settings.json"),
+        root.join(".suprai").join("settings.json"),
         r#"{"model":"anthropic/claude-opus-4-6","env":{"A":"settings","C":"settings"}}"#,
     )
     .expect("project settings fixture should write");
 
     let envs = [
         (
-            "CLAW_CONFIG_HOME",
+            "SUPRAI_CONFIG_HOME",
             config_home.to_str().expect("utf8 config home"),
         ),
         ("HOME", home.to_str().expect("utf8 home")),
@@ -2276,18 +2276,18 @@ fn config_json_attributes_precedence_and_shadowed_keys_425() {
             file["source"] == "project"
                 && file["path"]
                     .as_str()
-                    .is_some_and(|path| path.ends_with(".claw.json"))
+                    .is_some_and(|path| path.ends_with(".suprai.json"))
         })
-        .expect("project .claw.json entry");
+        .expect("project .suprai.json entry");
     let settings = files
         .iter()
         .find(|file| {
             file["source"] == "project"
                 && file["path"]
                     .as_str()
-                    .is_some_and(|path| path.ends_with(".claw/settings.json"))
+                    .is_some_and(|path| path.ends_with(".suprai/settings.json"))
         })
-        .expect("project .claw/settings.json entry");
+        .expect("project .suprai/settings.json entry");
 
     assert_eq!(legacy["status"], "loaded");
     assert_eq!(settings["status"], "loaded");
@@ -2320,7 +2320,7 @@ fn config_json_attributes_precedence_and_shadowed_keys_425() {
             .expect("legacy winning keys")
             .iter()
             .any(|value| value.as_str() == Some("env.B")),
-        "unshadowed legacy keys should remain attributed to .claw.json: {legacy}"
+        "unshadowed legacy keys should remain attributed to .suprai.json: {legacy}"
     );
 }
 
@@ -2331,12 +2331,12 @@ fn config_section_json_tolerates_unknown_keys_as_warnings_425() {
     let home = root.join("home");
     fs::create_dir_all(&config_home).expect("config home should exist");
     fs::create_dir_all(&home).expect("home should exist");
-    fs::write(root.join(".claw.json"), r#"{"model":"opus","alpha":"x"}"#)
+    fs::write(root.join(".suprai.json"), r#"{"model":"opus","alpha":"x"}"#)
         .expect("legacy config fixture should write");
 
     let envs = [
         (
-            "CLAW_CONFIG_HOME",
+            "SUPRAI_CONFIG_HOME",
             config_home.to_str().expect("utf8 config home"),
         ),
         ("HOME", home.to_str().expect("utf8 home")),
@@ -2367,19 +2367,19 @@ fn config_json_reports_structured_unloaded_file_reasons_407() {
     let root = unique_temp_dir("config-file-status-407");
     let config_home = root.join("config-home");
     let home = root.join("home");
-    fs::create_dir_all(root.join(".claw")).expect("workspace config should exist");
+    fs::create_dir_all(root.join(".suprai")).expect("workspace config should exist");
     fs::create_dir_all(&config_home).expect("config home should exist");
     fs::create_dir_all(&home).expect("home should exist");
-    fs::write(root.join(".claw.json"), "{not json").expect("legacy skip fixture should write");
+    fs::write(root.join(".suprai.json"), "{not json").expect("legacy skip fixture should write");
     fs::write(
-        root.join(".claw").join("settings.json"),
+        root.join(".suprai").join("settings.json"),
         r#"{"model":"opus"}"#,
     )
     .expect("project config fixture should write");
 
     let envs = [
         (
-            "CLAW_CONFIG_HOME",
+            "SUPRAI_CONFIG_HOME",
             config_home.to_str().expect("utf8 config home"),
         ),
         ("HOME", home.to_str().expect("utf8 home")),
@@ -2432,17 +2432,17 @@ fn config_json_list_reports_parse_errors_without_dropping_file_statuses_407() {
     let root = unique_temp_dir("config-file-load-error-407");
     let config_home = root.join("config-home");
     let home = root.join("home");
-    fs::create_dir_all(root.join(".claw")).expect("workspace config should exist");
+    fs::create_dir_all(root.join(".suprai")).expect("workspace config should exist");
     fs::create_dir_all(&config_home).expect("config home should exist");
     fs::create_dir_all(&home).expect("home should exist");
     fs::write(config_home.join("settings.json"), r#"{"model":"sonnet"}"#)
         .expect("user config fixture should write");
-    fs::write(root.join(".claw").join("settings.json"), "{not json")
+    fs::write(root.join(".suprai").join("settings.json"), "{not json")
         .expect("invalid project config fixture should write");
 
     let envs = [
         (
-            "CLAW_CONFIG_HOME",
+            "SUPRAI_CONFIG_HOME",
             config_home.to_str().expect("utf8 config home"),
         ),
         ("HOME", home.to_str().expect("utf8 home")),
@@ -2485,7 +2485,7 @@ fn global_json_surfaces_suppress_config_deprecation_stderr_810_821_824() {
 
     let envs = [
         (
-            "CLAW_CONFIG_HOME",
+            "SUPRAI_CONFIG_HOME",
             config_home.to_str().expect("utf8 config home"),
         ),
         ("HOME", home.to_str().expect("utf8 home")),
@@ -2581,7 +2581,7 @@ fn local_text_surface_preserves_config_deprecation_stderr_816() {
 
     let envs = [
         (
-            "CLAW_CONFIG_HOME",
+            "SUPRAI_CONFIG_HOME",
             config_home.to_str().expect("utf8 config home"),
         ),
         ("HOME", home.to_str().expect("utf8 home")),
@@ -2631,9 +2631,9 @@ fn assert_non_empty_action(parsed: &Value, args: &[&str]) {
 }
 
 fn run_claw(current_dir: &Path, args: &[&str], envs: &[(&str, &str)]) -> Output {
-    let mut command = Command::new(env!("CARGO_BIN_EXE_claw"));
+    let mut command = Command::new(env!("CARGO_BIN_EXE_suprai"));
     command.current_dir(current_dir).args(args);
-    for key in ["CLAW_OUTPUT_FORMAT", "CLAW_LOG", "RUST_LOG"] {
+    for key in ["SUPRAI_OUTPUT_FORMAT", "SUPRAI_LOG", "RUST_LOG"] {
         if !envs.iter().any(|(env_key, _)| *env_key == key) {
             command.env_remove(key);
         }
@@ -2641,7 +2641,7 @@ fn run_claw(current_dir: &Path, args: &[&str], envs: &[(&str, &str)]) -> Output 
     for (key, value) in envs {
         command.env(key, value);
     }
-    command.output().expect("claw should launch")
+    command.output().expect("suprai should launch")
 }
 
 fn parse_json_stdout(output: &Output, context: &str) -> Value {
@@ -2720,7 +2720,7 @@ fn unique_temp_dir(label: &str) -> PathBuf {
 
 #[test]
 fn diff_json_has_status_and_result_field_702() {
-    // #458/#702: `claw diff --output-format json` must have status ∈ {ok,error}
+    // #458/#702: `suprai diff --output-format json` must have status ∈ {ok,error}
     // and a `result` field to distinguish clean/changes/no-repo states.
     let root = unique_temp_dir("diff-json-status");
     fs::create_dir_all(&root).expect("temp dir should exist");
@@ -2791,7 +2791,7 @@ fn diff_json_changed_file_count_deduplication_733() {
         .output()
         .expect("git init");
     Command::new("git")
-        .args(["config", "user.email", "test@claw.test"])
+        .args(["config", "user.email", "test@suprai.test"])
         .current_dir(&root)
         .output()
         .expect("git config email");
@@ -2813,12 +2813,12 @@ fn diff_json_changed_file_count_deduplication_733() {
         .expect("git commit");
 
     // Clean state: changed_file_count must be 0
-    let bin = env!("CARGO_BIN_EXE_claw");
+    let bin = env!("CARGO_BIN_EXE_suprai");
     let clean = Command::new(bin)
         .current_dir(&root)
         .args(["--output-format", "json", "diff"])
         .output()
-        .expect("claw diff clean");
+        .expect("suprai diff clean");
     let clean_json: serde_json::Value =
         serde_json::from_slice(&clean.stdout).expect("diff clean stdout must be valid JSON");
     assert_eq!(clean_json["result"], "clean", "fresh repo must be clean");
@@ -2842,7 +2842,7 @@ fn diff_json_changed_file_count_deduplication_733() {
         .current_dir(&root)
         .args(["--output-format", "json", "diff"])
         .output()
-        .expect("claw diff dirty");
+        .expect("suprai diff dirty");
     let dirty_json: serde_json::Value =
         serde_json::from_slice(&dirty.stdout).expect("diff dirty stdout must be valid JSON");
     assert_eq!(
@@ -2858,95 +2858,95 @@ fn diff_json_changed_file_count_deduplication_733() {
 
 #[test]
 fn prompt_no_arg_json_error_kind_750() {
-    // #751/#750/#823: `claw prompt --output-format json` with no prompt argument must emit
+    // #751/#750/#823: `suprai prompt --output-format json` with no prompt argument must emit
     // error_kind:"missing_prompt" with stdout JSON, empty stderr, and a non-empty hint.
     // Before #823 the structured envelope could be routed to stderr, leaving stdout empty.
     use std::process::Command;
     let root = unique_temp_dir("prompt-no-arg");
     fs::create_dir_all(&root).expect("temp dir");
-    let bin = env!("CARGO_BIN_EXE_claw");
+    let bin = env!("CARGO_BIN_EXE_suprai");
 
     let output = Command::new(bin)
         .current_dir(&root)
         .args(["--output-format", "json", "prompt"])
         .output()
-        .expect("claw prompt should run");
+        .expect("suprai prompt should run");
     assert!(
         !output.status.success(),
-        "claw prompt with no arg must exit non-zero"
+        "suprai prompt with no arg must exit non-zero"
     );
     assert_eq!(
         output.status.code(),
         Some(1),
-        "claw prompt with no arg must exit rc=1 (#823)"
+        "suprai prompt with no arg must exit rc=1 (#823)"
     );
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert_eq!(
         stderr, "",
-        "claw prompt (no arg) --output-format json must keep stderr empty (#823); got: {stderr}"
+        "suprai prompt (no arg) --output-format json must keep stderr empty (#823); got: {stderr}"
     );
     let stdout = String::from_utf8_lossy(&output.stdout);
     let parsed: serde_json::Value = serde_json::from_str(stdout.trim()).unwrap_or_else(|_| {
         panic!(
-            "claw prompt (no arg) --output-format json must emit valid stdout JSON; got: {stdout}"
+            "suprai prompt (no arg) --output-format json must emit valid stdout JSON; got: {stdout}"
         )
     });
     assert_eq!(
         parsed["error_kind"], "missing_prompt",
-        "claw prompt no-arg must have error_kind:missing_prompt (#750/#823); got: {parsed}"
+        "suprai prompt no-arg must have error_kind:missing_prompt (#750/#823); got: {parsed}"
     );
     let hint = parsed["hint"].as_str().unwrap_or("");
     assert!(
         !hint.is_empty(),
-        "claw prompt no-arg hint must be non-empty (#750/#823)"
+        "suprai prompt no-arg hint must be non-empty (#750/#823)"
     );
     assert!(
-        hint.contains("claw prompt") || hint.contains("echo"),
-        "hint should mention 'claw prompt' or 'echo': {hint}"
+        hint.contains("suprai prompt") || hint.contains("echo"),
+        "hint should mention 'suprai prompt' or 'echo': {hint}"
     );
 }
 
 #[test]
 fn prompt_empty_arg_json_stdout_missing_prompt_823() {
-    // #823: `claw --output-format json prompt ""` must match the missing prompt
+    // #823: `suprai --output-format json prompt ""` must match the missing prompt
     // channel contract: rc=1, stdout JSON, error_kind:"missing_prompt", empty stderr.
     use std::process::Command;
     let root = unique_temp_dir("prompt-empty-arg-823");
     fs::create_dir_all(&root).expect("temp dir");
-    let bin = env!("CARGO_BIN_EXE_claw");
+    let bin = env!("CARGO_BIN_EXE_suprai");
 
     let output = Command::new(bin)
         .current_dir(&root)
         .args(["--output-format", "json", "prompt", ""])
         .output()
-        .expect("claw prompt empty arg should run");
+        .expect("suprai prompt empty arg should run");
     assert_eq!(
         output.status.code(),
         Some(1),
-        "claw prompt empty arg must exit rc=1 (#823)"
+        "suprai prompt empty arg must exit rc=1 (#823)"
     );
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert_eq!(
         stderr, "",
-        "claw prompt empty arg --output-format json must keep stderr empty (#823); got: {stderr}"
+        "suprai prompt empty arg --output-format json must keep stderr empty (#823); got: {stderr}"
     );
     let stdout = String::from_utf8_lossy(&output.stdout);
     let parsed: serde_json::Value = serde_json::from_str(stdout.trim()).unwrap_or_else(|_| {
         panic!(
-            "claw prompt empty arg --output-format json must emit valid stdout JSON; got: {stdout}"
+            "suprai prompt empty arg --output-format json must emit valid stdout JSON; got: {stdout}"
         )
     });
     assert_eq!(
         parsed["error_kind"], "missing_prompt",
-        "claw prompt empty arg must have error_kind:missing_prompt (#823); got: {parsed}"
+        "suprai prompt empty arg must have error_kind:missing_prompt (#823); got: {parsed}"
     );
     assert_eq!(
         parsed["action"], "abort",
-        "claw prompt empty arg must retain abort action (#823); got: {parsed}"
+        "suprai prompt empty arg must retain abort action (#823); got: {parsed}"
     );
     assert!(
         parsed["hint"].as_str().map_or(false, |h| !h.is_empty()),
-        "claw prompt empty arg missing_prompt hint must be non-empty (#823)"
+        "suprai prompt empty arg missing_prompt hint must be non-empty (#823)"
     );
 }
 
@@ -2957,14 +2957,14 @@ fn flag_value_errors_have_error_kind_and_hint_756() {
     use std::process::Command;
     let root = unique_temp_dir("flag-value-errors");
     fs::create_dir_all(&root).expect("temp dir");
-    let bin = env!("CARGO_BIN_EXE_claw");
+    let bin = env!("CARGO_BIN_EXE_suprai");
 
     // Case 1: --reasoning-effort with invalid value
     let out = Command::new(bin)
         .current_dir(&root)
         .args(["--output-format", "json", "--reasoning-effort", "HIGH"])
         .output()
-        .expect("claw --reasoning-effort HIGH should run");
+        .expect("suprai --reasoning-effort HIGH should run");
     assert!(
         !out.status.success(),
         "invalid reasoning-effort must exit non-zero"
@@ -2994,7 +2994,7 @@ fn flag_value_errors_have_error_kind_and_hint_756() {
         .current_dir(&root)
         .args(["--output-format", "json", "--model"])
         .output()
-        .expect("claw --model (no value) should run");
+        .expect("suprai --model (no value) should run");
     assert!(
         !out2.status.success(),
         "missing --model value must exit non-zero"
@@ -3077,7 +3077,7 @@ fn output_format_flags_and_env_have_typed_contract_433() {
     }
 
     let from_env =
-        assert_json_command_with_env(&root, &["status"], &[("CLAW_OUTPUT_FORMAT", "json")]);
+        assert_json_command_with_env(&root, &["status"], &[("SUPRAI_OUTPUT_FORMAT", "json")]);
     assert_eq!(from_env["kind"], "status");
     assert_eq!(from_env["format_source"], "env");
     assert_eq!(from_env["format_raw"], "json");
@@ -3085,7 +3085,7 @@ fn output_format_flags_and_env_have_typed_contract_433() {
     let flag_overrides_env = run_claw(
         &root,
         &["--output-format", "json", "status"],
-        &[("CLAW_OUTPUT_FORMAT", "text")],
+        &[("SUPRAI_OUTPUT_FORMAT", "text")],
     );
     assert!(flag_overrides_env.status.success());
     let override_json = parse_json_stdout(&flag_overrides_env, "flag overrides env output-format");
@@ -3118,12 +3118,12 @@ fn output_format_flags_and_env_have_typed_contract_433() {
     let help = assert_json_command(&root, &["--output-format", "json", "help"]);
     let help_text = help["message"].as_str().expect("help message");
     assert!(
-        help_text.contains("CLAW_OUTPUT_FORMAT"),
-        "help should document CLAW_OUTPUT_FORMAT: {help_text}"
+        help_text.contains("SUPRAI_OUTPUT_FORMAT"),
+        "help should document SUPRAI_OUTPUT_FORMAT: {help_text}"
     );
     assert!(
-        help_text.contains("CLAW_LOG"),
-        "help should document CLAW_LOG: {help_text}"
+        help_text.contains("SUPRAI_LOG"),
+        "help should document SUPRAI_LOG: {help_text}"
     );
     assert!(
         help_text.contains("RUST_LOG"),
@@ -3134,9 +3134,9 @@ fn output_format_flags_and_env_have_typed_contract_433() {
         &root,
         &["doctor"],
         &[
-            ("CLAW_OUTPUT_FORMAT", "json"),
-            ("CLAW_LOG", "debug"),
-            ("RUST_LOG", "claw=debug"),
+            ("SUPRAI_OUTPUT_FORMAT", "json"),
+            ("SUPRAI_LOG", "debug"),
+            ("RUST_LOG", "suprai=debug"),
         ],
     );
     let system_check = doctor["checks"]
@@ -3145,9 +3145,9 @@ fn output_format_flags_and_env_have_typed_contract_433() {
         .iter()
         .find(|check| check["name"] == "system")
         .expect("system check");
-    assert_eq!(system_check["claw_output_format"], "json");
-    assert_eq!(system_check["claw_log"], "debug");
-    assert_eq!(system_check["rust_log"], "claw=debug");
+    assert_eq!(system_check["suprai_output_format"], "json");
+    assert_eq!(system_check["suprai_log"], "debug");
+    assert_eq!(system_check["rust_log"], "suprai=debug");
 }
 
 #[test]
@@ -3198,7 +3198,7 @@ fn allowed_tools_errors_have_typed_json_and_alias_map_432() {
 
 #[test]
 fn short_p_flag_swallows_no_flags_755() {
-    // #755: `claw -p hello --output-format json` must parse --output-format json
+    // #755: `suprai -p hello --output-format json` must parse --output-format json
     // as a flag rather than swallowing it as part of the prompt. Before #755,
     // args[index+1..].join(" ") consumed all remaining tokens into the prompt.
     // After #755, -p consumes exactly one token and remaining flags are parsed.
@@ -3207,7 +3207,7 @@ fn short_p_flag_swallows_no_flags_755() {
     use std::process::Command;
     let root = unique_temp_dir("short-p-flags");
     fs::create_dir_all(&root).expect("temp dir");
-    let bin = env!("CARGO_BIN_EXE_claw");
+    let bin = env!("CARGO_BIN_EXE_suprai");
 
     // -p hello --output-format json: with no credentials, should fail with
     // missing_credentials (not missing_prompt), proving --output-format json was parsed.
@@ -3217,10 +3217,10 @@ fn short_p_flag_swallows_no_flags_755() {
         .env_remove("ANTHROPIC_API_KEY")
         .env_remove("ANTHROPIC_AUTH_TOKEN")
         .output()
-        .expect("claw -p should run");
+        .expect("suprai -p should run");
     assert!(
         !output.status.success(),
-        "claw -p hello --output-format json must exit non-zero (no credentials)"
+        "suprai -p hello --output-format json must exit non-zero (no credentials)"
     );
     // #819/#820/#823: abort envelopes route to stdout in JSON mode
     let raw = String::from_utf8_lossy(&output.stdout)
@@ -3242,14 +3242,14 @@ fn short_p_flag_swallows_no_flags_755() {
         .current_dir(&root)
         .args(["--output-format", "json", "-p", "--model", "sonnet"])
         .output()
-        .expect("claw -p flag-as-prompt should run");
+        .expect("suprai -p flag-as-prompt should run");
     let raw2 = String::from_utf8_lossy(&output2.stdout)
         .lines()
         .filter(|l| l.starts_with('{'))
         .collect::<Vec<_>>()
         .join("");
     let parsed2: serde_json::Value = serde_json::from_str(&raw2)
-        .unwrap_or_else(|_| panic!("claw -p --model must emit JSON to stdout; got: {raw2}"));
+        .unwrap_or_else(|_| panic!("suprai -p --model must emit JSON to stdout; got: {raw2}"));
     assert_eq!(
         parsed2["error_kind"], "missing_prompt",
         "flag-like token after -p must be rejected as missing_prompt (#755): {parsed2}"
@@ -3262,22 +3262,22 @@ fn short_p_flag_swallows_no_flags_755() {
 
 #[test]
 fn short_p_flag_no_arg_json_error_kind_753() {
-    // #753: `claw --output-format json -p` (no prompt) must emit error_kind:"missing_prompt"
+    // #753: `suprai --output-format json -p` (no prompt) must emit error_kind:"missing_prompt"
     // and non-empty hint. Before #753 it returned error_kind:"unknown" + hint:null.
     // Parity with #750 which fixed the explicit `prompt` verb.
     use std::process::Command;
     let root = unique_temp_dir("short-p-no-arg");
     fs::create_dir_all(&root).expect("temp dir");
-    let bin = env!("CARGO_BIN_EXE_claw");
+    let bin = env!("CARGO_BIN_EXE_suprai");
 
     let output = Command::new(bin)
         .current_dir(&root)
         .args(["--output-format", "json", "-p"])
         .output()
-        .expect("claw -p should run");
+        .expect("suprai -p should run");
     assert!(
         !output.status.success(),
-        "claw -p with no arg must exit non-zero"
+        "suprai -p with no arg must exit non-zero"
     );
     let stdout = String::from_utf8_lossy(&output.stdout);
     let raw = if stdout.trim().starts_with('{') {
@@ -3290,31 +3290,31 @@ fn short_p_flag_no_arg_json_error_kind_753() {
             .join("")
     };
     let parsed: serde_json::Value = serde_json::from_str(&raw).unwrap_or_else(|_| {
-        panic!("claw -p (no arg) --output-format json must emit valid JSON; got: {raw}")
+        panic!("suprai -p (no arg) --output-format json must emit valid JSON; got: {raw}")
     });
     assert_eq!(
         parsed["error_kind"], "missing_prompt",
-        "claw -p no-arg must have error_kind:missing_prompt (#753); got: {parsed}"
+        "suprai -p no-arg must have error_kind:missing_prompt (#753); got: {parsed}"
     );
     let hint = parsed["hint"].as_str().unwrap_or("");
     assert!(
         !hint.is_empty(),
-        "claw -p no-arg hint must be non-empty (#753)"
+        "suprai -p no-arg hint must be non-empty (#753)"
     );
     assert!(
-        hint.contains("claw -p") || hint.contains("claw prompt"),
-        "hint should mention 'claw -p' or 'claw prompt': {hint}"
+        hint.contains("suprai -p") || hint.contains("suprai prompt"),
+        "hint should mention 'suprai -p' or 'suprai prompt': {hint}"
     );
 }
 
 #[test]
 fn bare_slash_command_hint_745() {
-    // #747/#745: claw <slash-cmd> --output-format json must return non-null hint.
+    // #747/#745: suprai <slash-cmd> --output-format json must return non-null hint.
     // bare_slash_command_guidance() previously had no \n so split_error_hint returned hint:null.
     use std::process::Command;
     let root = unique_temp_dir("bare-slash-hint");
     fs::create_dir_all(&root).expect("temp dir");
-    let bin = env!("CARGO_BIN_EXE_claw");
+    let bin = env!("CARGO_BIN_EXE_suprai");
 
     // issue and pr are non-resume-supported; commit is resume-supported.
     // All must emit non-null hint in their interactive_only error envelope.
@@ -3324,7 +3324,7 @@ fn bare_slash_command_hint_745() {
             .args(["--output-format", "json", cmd])
             .env("ANTHROPIC_API_KEY", "test")
             .output()
-            .expect("claw should run");
+            .expect("suprai should run");
         assert!(
             !output.status.success(),
             "claw {cmd} outside REPL must exit non-zero"
@@ -3357,23 +3357,23 @@ fn bare_slash_command_hint_745() {
 
 #[test]
 fn config_unsupported_section_json_hint_741() {
-    // #744/#741: claw config <unknown-section> --output-format json must return
+    // #744/#741: suprai config <unknown-section> --output-format json must return
     // error_kind:unsupported_config_section with a non-null hint and supported_sections[].
     // This is the regression guard for #741 (hint was null before fix).
     use std::process::Command;
     let root = unique_temp_dir("config-unsupported-section");
     fs::create_dir_all(&root).expect("temp dir");
-    let bin = env!("CARGO_BIN_EXE_claw");
+    let bin = env!("CARGO_BIN_EXE_suprai");
 
     for section in &["list", "show", "bogus"] {
         let output = Command::new(bin)
             .current_dir(&root)
             .args(["--output-format", "json", "config", section])
             .output()
-            .expect("claw config should run");
+            .expect("suprai config should run");
         let stdout = String::from_utf8_lossy(&output.stdout);
         let parsed: serde_json::Value = serde_json::from_str(stdout.trim()).unwrap_or_else(|_| {
-            panic!("claw config {section} --output-format json must emit valid JSON; got: {stdout}")
+            panic!("suprai config {section} --output-format json must emit valid JSON; got: {stdout}")
         });
         assert_eq!(
             parsed["kind"], "config",
@@ -3409,12 +3409,12 @@ fn config_help_returns_structured_section_list_344() {
     use std::process::Command;
     let root = unique_temp_dir("config-help");
     fs::create_dir_all(&root).expect("temp dir");
-    let bin = env!("CARGO_BIN_EXE_claw");
+    let bin = env!("CARGO_BIN_EXE_suprai");
     let output = Command::new(bin)
         .current_dir(&root)
         .args(["--output-format", "json", "config", "help"])
         .output()
-        .expect("claw config help should run");
+        .expect("suprai config help should run");
     let stdout = String::from_utf8_lossy(&output.stdout);
     let parsed: serde_json::Value =
         serde_json::from_str(stdout.trim()).expect("config help should emit valid JSON");
@@ -3435,7 +3435,7 @@ fn config_help_returns_structured_section_list_344() {
 
 #[test]
 fn export_json_has_kind_702() {
-    // #458/#702: `claw export --output-format json` must emit kind:export.
+    // #458/#702: `suprai export --output-format json` must emit kind:export.
     // We check only the kind field to avoid flakiness from session-store state.
     // A success path with an actual session would also carry status:ok.
     let root = unique_temp_dir("export-json-kind");
@@ -3443,7 +3443,7 @@ fn export_json_has_kind_702() {
 
     // Run without asserting exit code — may fail with no sessions or legacy sessions.
     use std::process::Command;
-    let bin = env!("CARGO_BIN_EXE_claw");
+    let bin = env!("CARGO_BIN_EXE_suprai");
     let output = Command::new(bin)
         .current_dir(&root)
         .args(["--output-format", "json", "export"])
@@ -3531,14 +3531,14 @@ fn export_missing_session_json_error_uses_stdout_819() {
 
 #[test]
 fn config_parse_error_has_typed_error_kind_and_hint_764() {
-    // #764: Malformed .claw/settings.json must emit error_kind:config_parse_error
+    // #764: Malformed .suprai/settings.json must emit error_kind:config_parse_error
     // and a non-null hint in --output-format json mode (was error_kind:"unknown"
     // + hint:null before #763/#764 fixes).
     let root = unique_temp_dir("config-parse-error-764");
-    fs::create_dir_all(root.join(".claw")).expect("temp .claw dir should exist");
+    fs::create_dir_all(root.join(".suprai")).expect("temp .claw dir should exist");
 
     // Write an invalid JSON file (type mismatch: model must be a string)
-    fs::write(root.join(".claw").join("settings.json"), r#"{"model": 99}"#)
+    fs::write(root.join(".suprai").join("settings.json"), r#"{"model": 99}"#)
         .expect("settings.json should write");
 
     let output = run_claw(&root, &["--output-format", "json", "config", "show"], &[]);
@@ -3569,7 +3569,7 @@ fn config_parse_error_has_typed_error_kind_and_hint_764() {
 
 #[test]
 fn login_logout_removed_subcommands_have_error_kind_and_hint_765() {
-    // #765: `claw login` and `claw logout` are removed; JSON envelope must carry
+    // #765: `suprai login` and `suprai logout` are removed; JSON envelope must carry
     // error_kind:removed_subcommand + non-null hint pointing to the env var migration.
     // Before fix: single-line error string → error_kind:"unknown" + hint:null.
     let root = unique_temp_dir("login-logout-removed-765");
@@ -3609,14 +3609,14 @@ fn login_logout_removed_subcommands_have_error_kind_and_hint_765() {
 
 #[test]
 fn diff_extra_args_have_typed_error_kind_and_hint_766() {
-    // #766: `claw diff --bogus` returned error_kind:"unknown" + hint:null.
+    // #766: `suprai diff --bogus` returned error_kind:"unknown" + hint:null.
     // `diff` takes no arguments; extra args were unclassified with no remediation.
     let root = git_temp_dir("diff-extra-args-766");
 
     assert_diff_unexpected_extra_args_json(
         &root,
         &["--output-format", "json", "diff", "--bogus"],
-        "claw diff --bogus",
+        "suprai diff --bogus",
     );
 }
 
@@ -3630,11 +3630,11 @@ fn diff_trailing_json_after_malformed_args_is_bounded_json_3129() {
     for (args, label) in [
         (
             &["diff", "--bogus-flag", "--output-format", "json"][..],
-            "claw diff --bogus-flag --output-format json",
+            "suprai diff --bogus-flag --output-format json",
         ),
         (
             &["diff", "does-not-exist", "--output-format", "json"][..],
-            "claw diff does-not-exist --output-format json",
+            "suprai diff does-not-exist --output-format json",
         ),
         (
             &[
@@ -3644,7 +3644,7 @@ fn diff_trailing_json_after_malformed_args_is_bounded_json_3129() {
                 "--output-format",
                 "json",
             ][..],
-            "claw diff --cached --bogus-flag --output-format json",
+            "suprai diff --cached --bogus-flag --output-format json",
         ),
     ] {
         assert_diff_unexpected_extra_args_json(&root, args, label);
@@ -3706,7 +3706,7 @@ fn assert_diff_unexpected_extra_args_json(root: &Path, args: &[&str], label: &st
 
 #[test]
 fn resume_non_slash_trailing_arg_has_typed_error_kind_and_hint_768() {
-    // #768: `claw --resume latest compact` (missing leading /) returned
+    // #768: `suprai --resume latest compact` (missing leading /) returned
     // error_kind:"unknown" + hint:null. Resume is orchestration-critical;
     // wrappers need a machine-readable signal with a recovery hint.
     let root = unique_temp_dir("resume-invalid-arg-768");
@@ -3719,7 +3719,7 @@ fn resume_non_slash_trailing_arg_has_typed_error_kind_and_hint_768() {
     );
     assert!(
         !output.status.success(),
-        "claw --resume latest compact should exit non-zero"
+        "suprai --resume latest compact should exit non-zero"
     );
     let stdout = String::from_utf8_lossy(&output.stdout);
     let stderr = String::from_utf8_lossy(&output.stderr);
@@ -3748,7 +3748,7 @@ fn resume_non_slash_trailing_arg_has_typed_error_kind_and_hint_768() {
 
 #[test]
 fn session_with_unknown_subcommand_returns_interactive_only_not_credentials_767() {
-    // #767: `claw session bogus` bypassed all guards and fell through to
+    // #767: `suprai session bogus` bypassed all guards and fell through to
     // CliAction::Prompt, reaching the credential-check gate and returning
     // error_kind:"missing_credentials" instead of a structured routing error.
     // Fix: explicit "session" match arm returns interactive_only guidance.
@@ -3759,7 +3759,7 @@ fn session_with_unknown_subcommand_returns_interactive_only_not_credentials_767(
         let output = run_claw(&root, &["--output-format", "json", "session", sub], &[]);
         assert!(
             !output.status.success(),
-            "claw session {sub} should exit non-zero"
+            "suprai session {sub} should exit non-zero"
         );
         let stdout = String::from_utf8_lossy(&output.stdout);
         let stderr = String::from_utf8_lossy(&output.stderr);
@@ -3767,18 +3767,18 @@ fn session_with_unknown_subcommand_returns_interactive_only_not_credentials_767(
         let json_line = stdout
             .lines()
             .find(|l| l.trim_start().starts_with('{'))
-            .unwrap_or_else(|| panic!("claw session {sub} stderr should contain JSON"));
+            .unwrap_or_else(|| panic!("suprai session {sub} stderr should contain JSON"));
         let parsed: serde_json::Value =
             serde_json::from_str(json_line).expect("error envelope should be valid JSON");
 
         assert_eq!(
             parsed["error_kind"], "interactive_only",
-            "claw session {sub} must return error_kind:interactive_only (#767), not missing_credentials"
+            "suprai session {sub} must return error_kind:interactive_only (#767), not missing_credentials"
         );
         let hint = parsed["hint"].as_str().unwrap_or("");
         assert!(
             !hint.is_empty(),
-            "claw session {sub} must return non-null hint (#767)"
+            "suprai session {sub} must return non-null hint (#767)"
         );
         assert!(
             hint.contains("/session") || hint.contains("--resume"),
@@ -3789,8 +3789,8 @@ fn session_with_unknown_subcommand_returns_interactive_only_not_credentials_767(
 
 #[test]
 fn slash_only_verbs_with_args_return_interactive_only_not_credentials_770() {
-    // #770: `claw cost breakdown`, `claw clear --force`, `claw memory reset`,
-    // and `claw ultraplan bogus` all fell through to CliAction::Prompt and
+    // #770: `suprai cost breakdown`, `suprai clear --force`, `suprai memory reset`,
+    // and `suprai ultraplan bogus` all fell through to CliAction::Prompt and
     // reached the credential gate, returning error_kind:"missing_credentials".
     // These remain slash-only commands; multi-token invocations should return
     // interactive_only guidance. `model` is now a local bounded surface (#807).
@@ -3847,7 +3847,7 @@ fn slash_only_verbs_with_args_return_interactive_only_not_credentials_770() {
 
 #[test]
 fn agents_plugins_mcp_unknown_subcommand_have_hint_774() {
-    // #774: `claw agents bogus`, `claw plugins bogus`, `claw mcp bogus` returned
+    // #774: `suprai agents bogus`, `suprai plugins bogus`, `suprai mcp bogus` returned
     // hint:null despite having correct error_kind. Fixed by adding \n delimiter
     // to error strings in commands/src/lib.rs and explicit hint in mcp JSON envelope.
     let root = unique_temp_dir("unknown-subcommands-774");
@@ -4101,7 +4101,7 @@ fn resume_plugin_mutations_are_typed_interactive_only_777() {
             "/plugins {mutation} must have non-null hint (#777)"
         );
         assert!(
-            hint.contains("claw") || hint.contains("REPL") || hint.contains("plugins"),
+            hint.contains("suprai") || hint.contains("REPL") || hint.contains("plugins"),
             "/plugins {mutation} hint must reference live session or CLI, got: {hint:?}"
         );
     }
@@ -4158,14 +4158,14 @@ fn resume_skills_invocation_is_typed_interactive_only_779() {
         "resumed /skills invocation must have non-null hint (#779)"
     );
     assert!(
-        hint.contains("claw") || hint.contains("REPL") || hint.contains("skills"),
+        hint.contains("suprai") || hint.contains("REPL") || hint.contains("skills"),
         "hint must reference live session or CLI, got: {hint:?}"
     );
 }
 
 #[test]
 fn acp_unsupported_invocation_has_hint_782() {
-    // #782: `claw acp start` returned error_kind:unsupported_acp_invocation but hint:null
+    // #782: `suprai acp start` returned error_kind:unsupported_acp_invocation but hint:null
     // because the remediation text was on the same line as the error message.
     // Fix: add \n-delimited hint so split_error_hint extracts it.
     let root = unique_temp_dir("acp-unsupported-782");
@@ -4202,7 +4202,7 @@ fn acp_unsupported_invocation_has_hint_782() {
 
 #[test]
 fn init_json_envelope_has_hint_and_already_initialized_783() {
-    // #783: claw --output-format json init was missing the hint field entirely.
+    // #783: suprai --output-format json init was missing the hint field entirely.
     // Also added already_initialized: bool so orchestrators can detect the idempotent
     // case without checking created.len() == 0.
     let root = unique_temp_dir("init-hint-783");
@@ -4249,36 +4249,36 @@ fn init_json_envelope_has_hint_and_already_initialized_783() {
     assert_eq!(
         parsed["created"],
         json!([
-            ".claw/",
-            ".claw/settings.json",
-            ".claw.json",
+            ".suprai/",
+            ".suprai/settings.json",
+            ".suprai.json",
             ".gitignore",
             "CLAUDE.md"
         ]),
-        "fresh init should materialize .claw/settings.json and safe .claw.json"
+        "fresh init should materialize .suprai/settings.json and safe .suprai.json"
     );
     assert_eq!(
         parsed["deferred"],
-        json!([".claw/sessions/"]),
+        json!([".suprai/sessions/"]),
         "session storage should be reported as deferred until first save"
     );
     assert_eq!(parsed["partial"], json!([]));
-    let claw_json = fs::read_to_string(root.join(".claw.json")).expect("read .claw.json");
+    let claw_json = fs::read_to_string(root.join(".suprai.json")).expect("read .suprai.json");
     assert!(
         claw_json.contains("\"defaultMode\": \"acceptEdits\""),
-        "init must not scaffold dontAsk in .claw.json: {claw_json}"
+        "init must not scaffold dontAsk in .suprai.json: {claw_json}"
     );
     assert!(
         !claw_json.contains("dontAsk"),
         "init must not scaffold unsafe dontAsk permission mode: {claw_json}"
     );
-    let settings_json = root.join(".claw").join("settings.json");
+    let settings_json = root.join(".suprai").join("settings.json");
     assert!(
         settings_json.is_file(),
-        "init should template .claw/settings.json"
+        "init should template .suprai/settings.json"
     );
     assert!(
-        !root.join(".claw").join("sessions").exists(),
+        !root.join(".suprai").join("sessions").exists(),
         "sessions directory should remain deferred until first save"
     );
 
@@ -4309,7 +4309,7 @@ fn init_json_envelope_has_hint_and_already_initialized_783() {
     );
 
     let existing_claw_root = unique_temp_dir("init-existing-claw-436");
-    fs::create_dir_all(existing_claw_root.join(".claw")).expect("existing .claw dir");
+    fs::create_dir_all(existing_claw_root.join(".suprai")).expect("existing .claw dir");
     let partial_output = run_claw(
         &existing_claw_root,
         &["--output-format", "json", "init"],
@@ -4317,21 +4317,21 @@ fn init_json_envelope_has_hint_and_already_initialized_783() {
     );
     assert!(
         partial_output.status.success(),
-        "init with existing .claw should succeed"
+        "init with existing .suprai should succeed"
     );
     let partial_stdout = String::from_utf8_lossy(&partial_output.stdout);
     let partial: serde_json::Value =
         serde_json::from_str(partial_stdout.trim()).expect("partial init should emit valid JSON");
     assert_eq!(
         partial["partial"],
-        json!([".claw/"]),
-        "existing .claw with newly-created settings should report partial .claw/"
+        json!([".suprai/"]),
+        "existing .claw with newly-created settings should report partial .suprai/"
     );
     assert_eq!(
         partial["created"],
         json!([
-            ".claw/settings.json",
-            ".claw.json",
+            ".suprai/settings.json",
+            ".suprai.json",
             ".gitignore",
             "CLAUDE.md"
         ]),
@@ -4339,7 +4339,7 @@ fn init_json_envelope_has_hint_and_already_initialized_783() {
     );
     assert!(
         existing_claw_root
-            .join(".claw")
+            .join(".suprai")
             .join("settings.json")
             .is_file(),
         "existing .claw must receive missing settings template"
@@ -4348,8 +4348,8 @@ fn init_json_envelope_has_hint_and_already_initialized_783() {
 
 #[test]
 fn export_arg_errors_have_typed_kind_and_hint_784() {
-    // #784: `claw export --output` (missing flag value) returned error_kind:"unknown" + hint:null.
-    // `claw export a.md b.md` (extra positional) also returned unknown+null.
+    // #784: `suprai export --output` (missing flag value) returned error_kind:"unknown" + hint:null.
+    // `suprai export a.md b.md` (extra positional) also returned unknown+null.
     // Both export arg errors now use typed prefixes + usage hint.
     let root = unique_temp_dir("export-arg-errors-784");
     fs::create_dir_all(&root).expect("temp dir");
@@ -4416,7 +4416,7 @@ fn export_arg_errors_have_typed_kind_and_hint_784() {
 
 #[test]
 fn unknown_subcommand_returns_typed_kind_785() {
-    // #785: `claw dump` (a near-miss for dump-manifests) returned error_kind:"unknown"
+    // #785: `suprai dump` (a near-miss for dump-manifests) returned error_kind:"unknown"
     // because the classifier had no arm for "unknown subcommand:" prose prefix.
     // Fix: added "unknown_subcommand" arm in classify_error_kind.
     let root = unique_temp_dir("unknown-subcommand-785");
@@ -4446,14 +4446,14 @@ fn unknown_subcommand_returns_typed_kind_785() {
     // hint should point at the suggestion and/or --help
     let hint = j["hint"].as_str().unwrap_or("");
     assert!(
-        hint.contains("dump-manifests") || hint.contains("--help") || hint.contains("claw"),
+        hint.contains("dump-manifests") || hint.contains("--help") || hint.contains("suprai"),
         "hint should reference the suggested subcommand or help, got: {hint:?}"
     );
 }
 
 #[test]
 fn dump_manifests_missing_dir_has_typed_kind_and_hint_786() {
-    // #786: `claw dump-manifests --manifests-dir` (no value) and `--manifests-dir=` (empty)
+    // #786: `suprai dump-manifests --manifests-dir` (no value) and `--manifests-dir=` (empty)
     // both emitted plain "--manifests-dir requires a path" with error_kind:"unknown" + hint:null.
     // Fix: use missing_flag_value: prefix + \n usage hint.
     let root = unique_temp_dir("dump-manifests-missing-dir-786");
@@ -4530,7 +4530,7 @@ fn dump_manifests_missing_dir_has_typed_kind_and_hint_786() {
 
 #[test]
 fn resume_directory_path_returns_typed_kind_and_hint_787() {
-    // #787: `claw --resume /tmp` (directory instead of .jsonl file) returned
+    // #787: `suprai --resume /tmp` (directory instead of .jsonl file) returned
     // error_kind:"session_load_failed" + hint:null. The OS error "Is a directory (os error 21)"
     // had no \n delimiter so split_error_hint returned None, and the resume error path
     // didn't call fallback_hint_for_error_kind.
@@ -4583,7 +4583,7 @@ fn resume_directory_path_returns_typed_kind_and_hint_787() {
 
 #[test]
 fn skills_show_not_found_emits_single_json_object_788() {
-    // #788: `claw --output-format json skills show no-such-skill` emitted TWO JSON objects:
+    // #788: `suprai --output-format json skills show no-such-skill` emitted TWO JSON objects:
     // one from the skills handler (action:"show", status:"error") and a second from the
     // top-level error handler (action:"abort"). The skills handler returned Err() after
     // printing its JSON, which caused the ? propagation to trigger a duplicate envelope.
@@ -4685,7 +4685,7 @@ fn skills_show_not_found_emits_single_json_object_788() {
 
 #[test]
 fn agents_show_not_found_exits_nonzero_789() {
-    // #789: `claw --output-format json agents show <not-found>` returned exit 0 despite
+    // #789: `suprai --output-format json agents show <not-found>` returned exit 0 despite
     // emitting status:"error". print_agents had no error check — just println + Ok(()).
     // Skills was fixed in #788 (exit 1 via process::exit); agents/plugins had the same gap.
     let root = unique_temp_dir("agents-show-exit-789");
@@ -4720,7 +4720,7 @@ fn agents_show_not_found_exits_nonzero_789() {
 
 #[test]
 fn plugins_show_not_found_exits_nonzero_789() {
-    // #789: same as agents — `claw --output-format json plugins show <not-found>` exited 0
+    // #789: same as agents — `suprai --output-format json plugins show <not-found>` exited 0
     // despite status:"error". The not-found branch used `return Ok(())` instead of exit(1).
     let root = unique_temp_dir("plugins-show-exit-789");
     fs::create_dir_all(&root).expect("temp dir");
@@ -4754,7 +4754,7 @@ fn plugins_show_not_found_exits_nonzero_789() {
 
 #[test]
 fn system_prompt_unknown_option_returns_typed_kind_790() {
-    // #790: `claw --output-format json system-prompt bogus` returned error_kind:"unknown" + hint:null.
+    // #790: `suprai --output-format json system-prompt bogus` returned error_kind:"unknown" + hint:null.
     // The unknown-option branch emitted plain "unknown system-prompt option: bogus" with no typed
     // prefix. Fix: use unknown_option: prefix + \n usage hint.
     let root = unique_temp_dir("system-prompt-unknown-opt-790");
@@ -4788,7 +4788,7 @@ fn system_prompt_unknown_option_returns_typed_kind_790() {
         .as_str()
         .expect("unknown_option must have hint (#790)");
     assert!(
-        h1.contains("system-prompt") || h1.contains("claw"),
+        h1.contains("system-prompt") || h1.contains("suprai"),
         "hint should reference system-prompt usage, got: {h1:?}"
     );
 
@@ -4818,9 +4818,9 @@ fn system_prompt_unknown_option_returns_typed_kind_790() {
 
 #[test]
 fn config_extra_args_have_non_null_hint_791() {
-    // #791: `claw config show bogus-key` and `claw config set a b` returned
+    // #791: `suprai config show bogus-key` and `suprai config set a b` returned
     // error_kind:"unexpected_extra_args" + hint:null because the error message
-    // "unexpected extra arguments after `claw config ...`: ..." had no \n delimiter.
+    // "unexpected extra arguments after `suprai config ...`: ..." had no \n delimiter.
     // Fix: appended \n + usage hint to the format string.
     let root = unique_temp_dir("config-extra-args-791");
     fs::create_dir_all(&root).expect("temp dir");
@@ -4853,7 +4853,7 @@ fn config_extra_args_have_non_null_hint_791() {
         .as_str()
         .expect("unexpected_extra_args must have hint (#791)");
     assert!(
-        h1.contains("config") || h1.contains("claw"),
+        h1.contains("config") || h1.contains("suprai"),
         "hint should reference config usage, got: {h1:?}"
     );
 
@@ -4887,7 +4887,7 @@ fn config_extra_args_have_non_null_hint_791() {
 
 #[test]
 fn agents_list_flag_shaped_filter_returns_unknown_option_792() {
-    // #792: `claw --output-format json agents list --bogus-flag` silently returned
+    // #792: `suprai --output-format json agents list --bogus-flag` silently returned
     // status:"ok" count:0 instead of an error. The list filter arm in
     // handle_agents_slash_command_json treated "--bogus-flag" as a name substring
     // filter (no agents match), producing a false-positive empty success result.
@@ -4928,14 +4928,14 @@ fn agents_list_flag_shaped_filter_returns_unknown_option_792() {
         .as_str()
         .expect("unknown_option must have hint (#792)");
     assert!(
-        h.contains("claw agents list") || h.contains("filter"),
+        h.contains("suprai agents list") || h.contains("filter"),
         "hint should reference correct usage, got: {h:?}"
     );
 }
 
 #[test]
 fn skills_list_flag_shaped_filter_returns_unknown_option_792() {
-    // #792: same gap as agents — `claw skills list --bogus-flag` returned success
+    // #792: same gap as agents — `suprai skills list --bogus-flag` returned success
     // with empty list instead of unknown_option error.
     let root = unique_temp_dir("skills-list-flag-792");
     fs::create_dir_all(&root).expect("temp dir");
@@ -4972,14 +4972,14 @@ fn skills_list_flag_shaped_filter_returns_unknown_option_792() {
     assert!(
         j["hint"]
             .as_str()
-            .is_some_and(|h| h.contains("claw skills list") || h.contains("filter")),
+            .is_some_and(|h| h.contains("suprai skills list") || h.contains("filter")),
         "hint should reference correct usage (#792)"
     );
 }
 
 #[test]
 fn plugins_list_flag_shaped_filter_returns_cli_parse_on_stdout_793_817() {
-    // #793: `claw plugins list --bogus-flag` silently returned status:"ok" with empty
+    // #793: `suprai plugins list --bogus-flag` silently returned status:"ok" with empty
     // plugins list instead of an error. The list filter branch in print_plugins treated
     // "--bogus-flag" as an id substring filter and found no matches, producing a false-positive.
     // #817: in JSON mode, handled local parse errors now return error_kind:"cli_parse"
@@ -5022,14 +5022,14 @@ fn plugins_list_flag_shaped_filter_returns_cli_parse_on_stdout_793_817() {
         .as_str()
         .expect("error must have hint (#793/#803)");
     assert!(
-        h.contains("plugins list") || h.contains("filter") || h.contains("claw"),
+        h.contains("plugins list") || h.contains("filter") || h.contains("suprai"),
         "hint should reference plugins list usage, got: {h:?}"
     );
 }
 
 #[test]
 fn plugins_uninstall_not_found_has_hint_793() {
-    // #793: `claw plugins uninstall no-such-plugin` returned plugin_not_found + hint:null.
+    // #793: `suprai plugins uninstall no-such-plugin` returned plugin_not_found + hint:null.
     // The error propagated from plugins_command_payload_for via ? with no \n delimiter;
     // split_error_hint returned None and plugin_not_found wasn't in the fallback table.
     // Fix: added "plugin_not_found" entry to fallback_hint_for_error_kind().
@@ -5069,14 +5069,14 @@ fn plugins_uninstall_not_found_has_hint_793() {
         .as_str()
         .expect("plugin_not_found must have non-null hint (#793)");
     assert!(
-        h.contains("plugins list") || h.contains("claw plugins"),
+        h.contains("plugins list") || h.contains("suprai plugins"),
         "hint should reference plugins list, got: {h:?}"
     );
 }
 
 #[test]
 fn plugins_install_not_found_path_returns_typed_kind_794() {
-    // #794: `claw plugins install /nonexistent/path` returned error_kind:"unknown" + hint:null.
+    // #794: `suprai plugins install /nonexistent/path` returned error_kind:"unknown" + hint:null.
     // The message "plugin source ... was not found" had no classifier arm; fell to "unknown".
     // Fix: added "plugin_source_not_found" classifier arm + fallback hint table entry.
     let root = unique_temp_dir("plugins-install-794");
@@ -5136,7 +5136,7 @@ fn skills_lifecycle_errors_have_typed_local_json_795_431() {
         .ok();
     let envs = [
         (
-            "CLAW_CONFIG_HOME",
+            "SUPRAI_CONFIG_HOME",
             config_home.to_str().expect("utf8 config home"),
         ),
         ("HOME", home.to_str().expect("utf8 home")),
@@ -5238,7 +5238,7 @@ fn skills_install_uninstall_roundtrip_stays_local_431() {
     let skill_source = source_root.join("roundtrip");
     let envs = [
         (
-            "CLAW_CONFIG_HOME",
+            "SUPRAI_CONFIG_HOME",
             config_home.to_str().expect("utf8 config home"),
         ),
         ("HOME", home.to_str().expect("utf8 home")),
@@ -5317,7 +5317,7 @@ fn agents_create_scaffolds_toml_and_lists_locally_431() {
     fs::create_dir_all(&home).expect("home");
     let envs = [
         (
-            "CLAW_CONFIG_HOME",
+            "SUPRAI_CONFIG_HOME",
             config_home.to_str().expect("utf8 config home"),
         ),
         ("HOME", home.to_str().expect("utf8 home")),
@@ -5338,7 +5338,7 @@ fn agents_create_scaffolds_toml_and_lists_locally_431() {
         String::from_utf8_lossy(&create.stderr)
     );
     let create_json = parse_json_stdout(&create, "agents create my-agent");
-    let agent_path = root.join(".claw").join("agents").join("my-agent.toml");
+    let agent_path = root.join(".suprai").join("agents").join("my-agent.toml");
     let reported_agent_path = PathBuf::from(
         create_json["path"]
             .as_str()
@@ -5373,7 +5373,7 @@ fn agents_create_scaffolds_toml_and_lists_locally_431() {
 
 #[test]
 fn agents_show_extra_positional_arg_returns_unexpected_extra_796() {
-    // #796: `claw agents show <name> <extra>` treated the full "name extra" as a single
+    // #796: `suprai agents show <name> <extra>` treated the full "name extra" as a single
     // agent name, producing agent_not_found for "name extra" instead of flagging the
     // unexpected extra argument. Fix: detect space-containing "name" and return
     // unexpected_extra_args with usage hint.
@@ -5413,14 +5413,14 @@ fn agents_show_extra_positional_arg_returns_unexpected_extra_796() {
         .as_str()
         .expect("unexpected_extra_args must have hint (#796)");
     assert!(
-        h.contains("claw agents show") || h.contains("Usage"),
+        h.contains("suprai agents show") || h.contains("Usage"),
         "hint should reference usage, got: {h:?}"
     );
 }
 
 #[test]
 fn skills_show_extra_positional_arg_returns_unexpected_extra_796() {
-    // #796: same gap as agents — `claw skills show <name> <extra>` treated "name extra"
+    // #796: same gap as agents — `suprai skills show <name> <extra>` treated "name extra"
     // as a single skill name → skill_not_found. Fix: detect space-containing name.
     let root = unique_temp_dir("skills-show-extra-796");
     fs::create_dir_all(&root).expect("temp dir");
@@ -5457,16 +5457,16 @@ fn skills_show_extra_positional_arg_returns_unexpected_extra_796() {
     assert!(
         j["hint"]
             .as_str()
-            .is_some_and(|h| h.contains("claw skills show") || h.contains("Usage")),
+            .is_some_and(|h| h.contains("suprai skills show") || h.contains("Usage")),
         "hint should reference usage (#796)"
     );
 }
 
 #[test]
 fn plugins_extra_args_have_non_null_hint_797() {
-    // #797: `claw plugins show <name> <extra>` returned unexpected_extra_args + hint:null.
+    // #797: `suprai plugins show <name> <extra>` returned unexpected_extra_args + hint:null.
     // The plugins arg parser at the top level emitted "unexpected extra arguments after
-    // `claw plugins show ...`: ..." with no \n delimiter. Parity with #791 config fix.
+    // `suprai plugins show ...`: ..." with no \n delimiter. Parity with #791 config fix.
     let root = unique_temp_dir("plugins-extra-args-797");
     fs::create_dir_all(&root).expect("temp dir");
     std::process::Command::new("git")
@@ -5560,14 +5560,14 @@ fn plugins_list_trailing_dash_text_error_stays_on_stderr_817() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stderr.contains("[error-kind: cli_parse]"), "{stderr}");
     assert!(
-        stderr.contains("unknown option for `claw plugins list`: --"),
+        stderr.contains("unknown option for `suprai plugins list`: --"),
         "{stderr}"
     );
 }
 
 #[test]
 fn empty_prompt_has_non_null_hint_798() {
-    // #798: `claw --output-format json ""` returned empty_prompt + hint:null.
+    // #798: `suprai --output-format json ""` returned empty_prompt + hint:null.
     // The error message "empty prompt: provide a subcommand..." had no \n delimiter.
     let root = unique_temp_dir("empty-prompt-798");
     fs::create_dir_all(&root).expect("temp dir");
@@ -5594,14 +5594,14 @@ fn empty_prompt_has_non_null_hint_798() {
         .as_str()
         .expect("empty_prompt must have non-null hint (#798)");
     assert!(
-        h.contains("claw") || h.contains("Usage"),
+        h.contains("suprai") || h.contains("Usage"),
         "hint should reference usage, got: {h:?}"
     );
 }
 
 #[test]
 fn diff_non_git_dir_has_error_kind_and_hint_801() {
-    // #801: `claw --output-format json diff` in a non-git directory returned
+    // #801: `suprai --output-format json diff` in a non-git directory returned
     // status:"error" + result:"no_git_repo" but had no error_kind, hint, or
     // message fields — violating the error envelope contract. Fix: added all
     // three fields to the no_git_repo JSON branch.
@@ -5805,7 +5805,7 @@ fn multi_word_unknown_subcommand_json_emits_command_not_found_826() {
     );
     let hint = j["hint"].as_str().unwrap_or_default();
     assert!(
-        hint.contains("claw prompt") || hint.contains("--help"),
+        hint.contains("suprai prompt") || hint.contains("--help"),
         "hint should explain prompt/command recovery, got: {hint:?}"
     );
     assert!(
@@ -5824,7 +5824,7 @@ fn compact_flag_missing_argument_and_shorthand_prompt_contract_435() {
     std::fs::create_dir_all(&home).expect("create home");
     let envs = [
         (
-            "CLAW_CONFIG_HOME",
+            "SUPRAI_CONFIG_HOME",
             config_home.to_str().expect("config home utf8"),
         ),
         ("HOME", home.to_str().expect("home utf8")),

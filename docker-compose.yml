@@ -19,8 +19,8 @@ services:
       CLAW_RAG_MOCK_PROVIDERS: "1"
       CLAW_RAG_DB: "/data/index.sqlite"
       CLAW_RAG_HOST: "0.0.0.0"
-      CLAW_RAG_QDRANT_URL: "http://qdrant:6334"
-      CLAW_RAG_QDRANT_COLLECTION: "claw_rag_chunks"
+      SUPRAI_RAG_QDRANT_URL: "http://qdrant:6334"
+      SUPRAI_RAG_QDRANT_COLLECTION: "claw_rag_chunks"
     ports:
       - "8787:8787"
     depends_on:
@@ -36,8 +36,8 @@ services:
     environment:
       CLAW_RAG_MOCK_PROVIDERS: "1"
       CLAW_RAG_DB: "/data/index.sqlite"
-      CLAW_RAG_QDRANT_URL: "http://qdrant:6334"
-      CLAW_RAG_QDRANT_COLLECTION: "claw_rag_chunks"
+      SUPRAI_RAG_QDRANT_URL: "http://qdrant:6334"
+      SUPRAI_RAG_QDRANT_COLLECTION: "claw_rag_chunks"
     depends_on:
       - qdrant
     volumes:

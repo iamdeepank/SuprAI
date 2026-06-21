@@ -376,14 +376,14 @@ fn workspace_root_or_eprint(manifest_dir: Option<&Path>) -> Option<PathBuf> {
         .unwrap_or_else(|| PathBuf::from("."));
     discover_cargo_workspace(&start).or_else(|| {
         eprintln!(
-            "cargo: could not find a [workspace] Cargo.toml above {}.\n      Pass --manifest-dir pointing at the `rust` folder of claw-code.",
+            "cargo: could not find a [workspace] Cargo.toml above {}.\n      Pass --manifest-dir pointing at the `rust` folder of SuprAI.",
             start.display()
         );
         None
     })
 }
 
-/// `cargo check` does not replace `target/debug/claw-analog.exe`, so `cargo run … doctor` works on Windows.
+/// `cargo check` does not replace `target/debug/suprai-analog.exe`, so `cargo run … doctor` works on Windows.
 fn run_cargo_check(manifest_dir: Option<&Path>) -> bool {
     let Some(root) = workspace_root_or_eprint(manifest_dir) else {
         return false;

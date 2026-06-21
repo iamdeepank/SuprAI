@@ -276,13 +276,13 @@ fn instruction_file_source(path: &Path) -> &'static str {
         .and_then(|name| name.to_str());
 
     match (parent_name, file_name) {
-        (Some(".claw"), Some("CLAUDE.md")) => "claw_claude_md",
+        (Some(".suprai"), Some("CLAUDE.md")) => "claw_claude_md",
         (Some(".claude"), Some("CLAUDE.md")) => "claude_claude_md",
         (_, Some("CLAUDE.md")) => "claude_md",
-        (_, Some("CLAW.md")) => "claw_md",
+        (_, Some("SUPRAI.md")) => "suprai_md",
         (_, Some("AGENTS.md")) => "agents_md",
         (_, Some("CLAUDE.local.md")) => "claude_local_md",
-        (Some(".claw"), Some("instructions.md")) => "claw_instructions",
+        (Some(".suprai"), Some("instructions.md")) => "claw_instructions",
         _ => "rule_file",
     }
 }
@@ -297,17 +297,17 @@ fn discover_instruction_files(
     for dir in directories {
         for candidate in [
             dir.join("CLAUDE.md"),
-            dir.join("CLAW.md"),
+            dir.join("SUPRAI.md"),
             dir.join("AGENTS.md"),
             dir.join("CLAUDE.local.md"),
-            dir.join(".claw").join("CLAUDE.md"),
+            dir.join(".suprai").join("CLAUDE.md"),
             dir.join(".claude").join("CLAUDE.md"),
-            dir.join(".claw").join("instructions.md"),
+            dir.join(".suprai").join("instructions.md"),
         ] {
             push_context_file(&mut files, candidate)?;
         }
-        push_rules_dir(&mut files, dir.join(".claw").join("rules"))?;
-        push_rules_dir(&mut files, dir.join(".claw").join("rules.local"))?;
+        push_rules_dir(&mut files, dir.join(".suprai").join("rules"))?;
+        push_rules_dir(&mut files, dir.join(".suprai").join("rules.local"))?;
         push_framework_imports(&mut files, &dir, rules_import)?
     }
     Ok(dedupe_instruction_files(files))
@@ -656,7 +656,7 @@ fn render_config_section(config: &RuntimeConfig) -> String {
     let mut lines = vec!["# Runtime config".to_string()];
     if config.loaded_entries().is_empty() {
         lines.extend(prepend_bullets(vec![
-            "No Claw Code settings files loaded.".to_string()
+            "No SuprAI settings files loaded.".to_string()
         ]));
         return lines.join("\n");
     }
@@ -759,8 +759,8 @@ mod tests {
     #[test]
     fn discovers_claw_rules_files_in_sorted_order() {
         let root = temp_dir();
-        let rules = root.join(".claw").join("rules");
-        let local_rules = root.join(".claw").join("rules.local");
+        let rules = root.join(".suprai").join("rules");
+        let local_rules = root.join(".suprai").join("rules.local");
         fs::create_dir_all(&rules).expect("rules dir");
         fs::create_dir_all(&local_rules).expect("local rules dir");
         fs::write(rules.join("b.txt"), "b rule").expect("write b rule");
@@ -782,12 +782,12 @@ mod tests {
     #[test]
     fn rules_import_none_suppresses_external_framework_rules() {
         let root = temp_dir();
-        fs::create_dir_all(root.join(".claw").join("rules")).expect("rules dir");
+        fs::create_dir_all(root.join(".suprai").join("rules")).expect("rules dir");
         fs::write(
-            root.join(".claw").join("rules").join("project.md"),
+            root.join(".suprai").join("rules").join("project.md"),
             "claw rule",
         )
-        .expect("write claw rule");
+        .expect("write suprai rule");
         fs::write(root.join(".cursorrules"), "cursor rule").expect("write cursor rule");
 
         let context = ProjectContext::discover_with_rules_import(
@@ -832,24 +832,24 @@ mod tests {
     fn discovers_instruction_files_from_ancestor_chain() {
         let root = temp_dir();
         let nested = root.join("apps").join("api");
-        fs::create_dir_all(nested.join(".claw")).expect("nested claw dir");
+        fs::create_dir_all(nested.join(".suprai")).expect("nested suprai dir");
         fs::create_dir(root.join(".git")).expect("git boundary");
         fs::write(root.join("CLAUDE.md"), "root instructions").expect("write root instructions");
         fs::write(root.join("CLAUDE.local.md"), "local instructions")
             .expect("write local instructions");
         fs::create_dir_all(root.join("apps")).expect("apps dir");
-        fs::create_dir_all(root.join("apps").join(".claw")).expect("apps claw dir");
+        fs::create_dir_all(root.join("apps").join(".suprai")).expect("apps suprai dir");
         fs::write(root.join("apps").join("CLAUDE.md"), "apps instructions")
             .expect("write apps instructions");
         fs::write(
-            root.join("apps").join(".claw").join("instructions.md"),
+            root.join("apps").join(".suprai").join("instructions.md"),
             "apps dot claude instructions",
         )
         .expect("write apps dot claude instructions");
-        fs::write(nested.join(".claw").join("CLAUDE.md"), "nested rules")
+        fs::write(nested.join(".suprai").join("CLAUDE.md"), "nested rules")
             .expect("write nested rules");
         fs::write(
-            nested.join(".claw").join("instructions.md"),
+            nested.join(".suprai").join("instructions.md"),
             "nested instructions",
         )
         .expect("write nested instructions");
@@ -916,7 +916,7 @@ mod tests {
         let root = temp_dir();
         fs::create_dir_all(root.join(".claude")).expect("dot claude dir");
         fs::write(root.join("CLAUDE.md"), "claude instructions").expect("write CLAUDE.md");
-        fs::write(root.join("CLAW.md"), "claw instructions").expect("write CLAW.md");
+        fs::write(root.join("SUPRAI.md"), "claw instructions").expect("write SUPRAI.md");
         fs::write(root.join("AGENTS.md"), "agents instructions").expect("write AGENTS.md");
         fs::write(
             root.join(".claude").join("CLAUDE.md"),
@@ -934,7 +934,7 @@ mod tests {
 
         assert_eq!(
             sources,
-            vec!["claude_md", "claw_md", "agents_md", "claude_claude_md"]
+            vec!["claude_md", "suprai_md", "agents_md", "claude_claude_md"]
         );
         assert!(rendered.contains("claude instructions"));
         assert!(rendered.contains("claw instructions"));
@@ -1022,7 +1022,7 @@ mod tests {
     #[test]
     fn displays_context_paths_compactly() {
         assert_eq!(
-            display_context_path(Path::new("/tmp/project/.claw/CLAUDE.md")),
+            display_context_path(Path::new("/tmp/project/.suprai/CLAUDE.md")),
             "CLAUDE.md"
         );
     }
@@ -1182,10 +1182,10 @@ mod tests {
     #[test]
     fn load_system_prompt_reads_claude_files_and_config() {
         let root = temp_dir();
-        fs::create_dir_all(root.join(".claw")).expect("claw dir");
+        fs::create_dir_all(root.join(".suprai")).expect("claw dir");
         fs::write(root.join("CLAUDE.md"), "Project rules").expect("write instructions");
         fs::write(
-            root.join(".claw").join("settings.json"),
+            root.join(".suprai").join("settings.json"),
             r#"{"permissionMode":"acceptEdits"}"#,
         )
         .expect("write settings");
@@ -1194,9 +1194,9 @@ mod tests {
         ensure_valid_cwd();
         let previous = std::env::current_dir().expect("cwd");
         let original_home = std::env::var("HOME").ok();
-        let original_claw_home = std::env::var("CLAW_CONFIG_HOME").ok();
+        let original_claw_home = std::env::var("SUPRAI_CONFIG_HOME").ok();
         std::env::set_var("HOME", &root);
-        std::env::set_var("CLAW_CONFIG_HOME", root.join("missing-home"));
+        std::env::set_var("SUPRAI_CONFIG_HOME", root.join("missing-home"));
         std::env::set_current_dir(&root).expect("change cwd");
         let prompt = super::load_system_prompt(
             &root,
@@ -1218,9 +1218,9 @@ mod tests {
             std::env::remove_var("HOME");
         }
         if let Some(value) = original_claw_home {
-            std::env::set_var("CLAW_CONFIG_HOME", value);
+            std::env::set_var("SUPRAI_CONFIG_HOME", value);
         } else {
-            std::env::remove_var("CLAW_CONFIG_HOME");
+            std::env::remove_var("SUPRAI_CONFIG_HOME");
         }
 
         assert!(prompt.contains("Project rules"));
@@ -1231,10 +1231,10 @@ mod tests {
     #[test]
     fn load_system_prompt_respects_rules_import_config() {
         let root = temp_dir();
-        fs::create_dir_all(root.join(".claw")).expect("claw dir");
+        fs::create_dir_all(root.join(".suprai")).expect("claw dir");
         fs::write(root.join(".cursorrules"), "cursor rule").expect("write cursor rule");
         fs::write(
-            root.join(".claw").join("settings.json"),
+            root.join(".suprai").join("settings.json"),
             r#"{"rulesImport":"none"}"#,
         )
         .expect("write settings");
@@ -1243,9 +1243,9 @@ mod tests {
         ensure_valid_cwd();
         let previous = std::env::current_dir().expect("cwd");
         let original_home = std::env::var("HOME").ok();
-        let original_claw_home = std::env::var("CLAW_CONFIG_HOME").ok();
+        let original_claw_home = std::env::var("SUPRAI_CONFIG_HOME").ok();
         std::env::set_var("HOME", &root);
-        std::env::set_var("CLAW_CONFIG_HOME", root.join("missing-home"));
+        std::env::set_var("SUPRAI_CONFIG_HOME", root.join("missing-home"));
         std::env::set_current_dir(&root).expect("change cwd");
         let prompt = super::load_system_prompt(
             &root,
@@ -1263,9 +1263,9 @@ mod tests {
             std::env::remove_var("HOME");
         }
         if let Some(value) = original_claw_home {
-            std::env::set_var("CLAW_CONFIG_HOME", value);
+            std::env::set_var("SUPRAI_CONFIG_HOME", value);
         } else {
-            std::env::remove_var("CLAW_CONFIG_HOME");
+            std::env::remove_var("SUPRAI_CONFIG_HOME");
         }
 
         assert!(!prompt.contains("cursor rule"));
@@ -1320,10 +1320,10 @@ mod tests {
     #[test]
     fn renders_claude_code_style_sections_with_project_context() {
         let root = temp_dir();
-        fs::create_dir_all(root.join(".claw")).expect("claw dir");
+        fs::create_dir_all(root.join(".suprai")).expect("claw dir");
         fs::write(root.join("CLAUDE.md"), "Project rules").expect("write CLAUDE.md");
         fs::write(
-            root.join(".claw").join("settings.json"),
+            root.join(".suprai").join("settings.json"),
             r#"{"permissionMode":"acceptEdits"}"#,
         )
         .expect("write settings");
@@ -1362,9 +1362,9 @@ mod tests {
     fn discovers_dot_claude_instructions_markdown() {
         let root = temp_dir();
         let nested = root.join("apps").join("api");
-        fs::create_dir_all(nested.join(".claw")).expect("nested claw dir");
+        fs::create_dir_all(nested.join(".suprai")).expect("nested suprai dir");
         fs::write(
-            nested.join(".claw").join("instructions.md"),
+            nested.join(".suprai").join("instructions.md"),
             "instruction markdown",
         )
         .expect("write instructions.md");
@@ -1373,7 +1373,7 @@ mod tests {
         assert!(context
             .instruction_files
             .iter()
-            .any(|file| file.path.ends_with(".claw/instructions.md")));
+            .any(|file| file.path.ends_with(".suprai/instructions.md")));
         assert!(
             render_instruction_files(&context.instruction_files).contains("instruction markdown")
         );

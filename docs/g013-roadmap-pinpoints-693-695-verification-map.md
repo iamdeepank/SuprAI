@@ -2,7 +2,7 @@
 
 This map records the current-head follow-up that was discovered after resetting
 `main` to `origin/main`: ROADMAP.md contained three new Pinpoint headings not
-covered by the Claw Code 2.0 board.
+covered by the SuprAI 2.0 board.
 
 ## Pinpoint #693 — typed phase error instead of silent `unknown`
 
